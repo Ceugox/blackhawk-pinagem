@@ -83,6 +83,24 @@ td.pinv { font-family: var(--font-mono); font-weight: 600; }
 code { font-family: var(--font-mono); font-size: .92em; }
 body { margin: 0; }
 img { max-width: 100%; }
+
+.scheme { gap: 14px; }
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.tabs button { font: 600 13.5px var(--font-body); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 5px 12px; cursor: pointer; }
+.tabs button[aria-pressed="true"] { border-color: var(--fg); box-shadow: inset 0 0 0 1px var(--fg); }
+.tabs button:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+.scheme-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 820px) { .scheme-grid { grid-template-columns: 1fr; } }
+.mx-wrap { overflow-x: auto; min-width: 0; }
+.mx-wrap svg { display: block; width: 100%; height: auto; }
+.mx-btn { cursor: pointer; }
+.mx-btn:focus { outline: none; }
+.mx-btn:focus-visible rect { stroke: var(--fg); stroke-width: 2.5; }
+.steps { display: grid; gap: 10px; min-width: 0; }
+.steps ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14px; }
+.steps pre { margin: 0; font: 600 15px var(--font-mono); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px 12px; overflow-x: auto; }
+.steps .ghost { font-size: 13px; color: var(--muted); }
+svg .pin.hit rect, svg .pin.hit circle:first-of-type { stroke: #ffffff; stroke-width: 3.2; }
 </style>
 </head>
 <body>
@@ -110,6 +128,20 @@ img { max-width: 100%; }
     </div>
   </div>
 
+  <section class="card scheme" aria-labelledby="esquema-titulo">
+    <h2 id="esquema-titulo">Como um botão é lido</h2>
+    <p>Cada botão fica no cruzamento de uma linha com uma coluna. Escolha a placa e clique num botão para ver o caminho do sinal e a linha que o Mega manda pela serial. Os dois pinos usados acendem no desenho do Mega acima.</p>
+    <div class="tabs" role="group" aria-label="Escolher a matriz">
+      <button type="button" id="t-fms" data-m="fms" aria-pressed="true">Teclado FMS 7×12</button>
+      <button type="button" id="t-m1" data-m="m1" aria-pressed="false">Placa 1 4×8</button>
+      <button type="button" id="t-m2" data-m="m2" aria-pressed="false">Placa 2 4×8</button>
+    </div>
+    <div class="scheme-grid">
+      <div class="mx-wrap"><svg id="mx" viewBox="0 0 640 380" role="img" aria-label="Esquema da matriz escolhida, com linhas, colunas e botões"></svg></div>
+      <div class="steps" id="mx-steps" aria-live="polite"></div>
+    </div>
+  </section>
+
   <div class="cards" id="cards"></div>
 
   <div class="notes">
@@ -135,9 +167,19 @@ img { max-width: 100%; }
 
   // Pinagem do firmware v6 (firmware/fms_teclado/fms_teclado.ino do Simulador-BlackHawk).
   // Fonte unica: o desenho e as fichas saem daqui.
+  // Chave do esquematico em cada posicao do FMS (CHAVE_FMS do firmware); -1 = sem tecla.
+  var CHAVE_FMS = [
+    [ 0, 11, 18, 25, 32, 39, 44, 51, 58, 65, 71, 77],
+    [ 1, 10, 17, 24, 31, 38, 43, 50, 57, 64, 70, 76],
+    [ 2,  9, 16, 23, 30, 37, 42, 49, 56, 63, 69, 75],
+    [ 3,  8, 15, 22, 29, 36, 41, 48, 55, 62, -1, 74],
+    [ 4, -1, 14, 21, 28, 35, 47, 54, 61, 68, -1, 73],
+    [ 5,  7, 13, 20, 27, 34, 78, 46, 53, 60, 67, 72],
+    [-1,  6, 12, 19, 26, 33, 40, 45, 52, 59, 66, -1]
+  ];
   var BOARDS = [
     { id: "fms", title: "Teclado FMS", sub: "7 linhas × 12 colunas, 79 teclas", L: ["22","24","26","28","30","32","34"], C: ["23","25","27","29","31","33","35","37","39","41","43","45"],
-      note: "Tudo na barra dupla: linhas na coluna de dentro (pares), colunas na de fora (ímpares). São 19 fios." },
+      note: "Tudo na barra dupla: linhas na coluna de dentro (pares), colunas na de fora (ímpares). São 19 fios.", chave: CHAVE_FMS },
     { id: "m1", title: "Placa 1", sub: "M1, 4 × 8, 32 botões", L: ["2","3","4","5"], C: ["6","7","8","9","10","11","12","44"],
       note: "Linhas e C1 a C7 na barra de cima. A C8 vai no D44, na barra dupla, lado de dentro, na mesma fileira do D45 (C12 do FMS): confira o furo antes de espetar." },
     { id: "m2", title: "Placa 2", sub: "M2, 4 × 8, 32 botões", L: ["36","38","40","42"], C: ["46","47","48","49","50","51","52","53"],
@@ -147,7 +189,7 @@ img { max-width: 100%; }
   function label(p) { return /^\d+$/.test(p) ? "D" + p : p; }
 
   // Papeis fixos primeiro; uma matriz so pode ocupar pino livre.
-  var role = {}, conflitos = [], desenhados = {};
+  var role = {}, conflitos = [], desenhados = {}, pinEl = {};
   ["0","1"].forEach(function (p) { role[p] = { g: "serial" }; });
   ["13","14","15","16","17","18","19","20","21"].forEach(function (p) { role[p] = { g: "free" }; });
   for (var n = 22; n <= 53; n++) role[String(n)] = { g: "free" };
@@ -183,6 +225,7 @@ img { max-width: 100%; }
     var r = role[p];
     if (!r) { conflitos.push(p + " sem papel"); r = { g: "power" }; }
     var g = el("g", { "class": "pin", "data-g": r.g });
+    pinEl[p] = g;
     var tip = label(p);
     if (r.kind) {
       tip += " = " + NAME[r.g] + " " + (r.kind === "L" ? "linha L" : "coluna C") + r.i;
@@ -301,6 +344,111 @@ img { max-width: 100%; }
       (b.id === "m1" ? "<div class=\"warn\">" + b.note + "</div>" : "<p>" + b.note + "</p>");
     cards.appendChild(c);
   });
+
+  // Esquema da matriz: linha em LOW, coluna lida com pull-up, botao no cruzamento.
+  var mx = document.getElementById("mx"), steps = document.getElementById("mx-steps");
+  var BY = {};
+  BOARDS.forEach(function (b) { BY[b.id] = b; });
+  var atual = null, linhasEl = [], colunasEl = [], botoesEl = {}, sel = null, pinosAcesos = [];
+
+  function mxEl(tag, attrs, parent, text) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (text != null) e.textContent = text;
+    (parent || mx).appendChild(e);
+    return e;
+  }
+
+  function desenharMatriz(id) {
+    var b = BY[id];
+    atual = b; linhasEl = []; colunasEl = []; botoesEl = {}; sel = null;
+    while (mx.firstChild) mx.removeChild(mx.firstChild);
+    var nL = b.L.length, nC = b.C.length, cell = 44, x0 = 92, y0 = 58;
+    var w = x0 + nC * cell + 12, h = y0 + nL * cell + 22;
+    mx.setAttribute("viewBox", "0 0 " + w + " " + h);
+    mx.style.minWidth = id === "fms" ? "600px" : "0";
+    var mono = "IBM Plex Mono, monospace";
+    for (var j = 0; j < nC; j++) {
+      var cx = x0 + j * cell + cell / 2;
+      mxEl("text", { x: cx, y: 18, "text-anchor": "middle", fill: "var(--fg)", "font-family": mono, "font-size": 11, "font-weight": 600 }, null, "C" + (j + 1));
+      mxEl("text", { x: cx, y: 33, "text-anchor": "middle", fill: "var(--muted)", "font-family": mono, "font-size": 10 }, null, "D" + b.C[j]);
+      colunasEl.push(mxEl("line", { x1: cx, y1: 42, x2: cx, y2: y0 + nL * cell - 4, stroke: "var(--line)", "stroke-width": 1.6 }));
+    }
+    for (var i = 0; i < nL; i++) {
+      var cy = y0 + i * cell + cell / 2;
+      mxEl("text", { x: 6, y: cy + 4, fill: "var(--fg)", "font-family": mono, "font-size": 11, "font-weight": 600 }, null, "L" + (i + 1));
+      mxEl("text", { x: 34, y: cy + 4, fill: "var(--muted)", "font-family": mono, "font-size": 10 }, null, "D" + b.L[i]);
+      linhasEl.push(mxEl("line", { x1: 70, y1: cy, x2: x0 + nC * cell - 4, y2: cy, stroke: "var(--line)", "stroke-width": 1.6 }));
+    }
+    for (var li = 0; li < nL; li++) {
+      for (var cj = 0; cj < nC; cj++) {
+        (function (i, j) {
+          var x = x0 + j * cell + cell / 2, y = y0 + i * cell + cell / 2;
+          var k = b.chave ? b.chave[i][j] : null;
+          if (k === -1) {
+            var vazio = mxEl("rect", { x: x - 13, y: y - 13, width: 26, height: 26, rx: 5, fill: "var(--surface)", stroke: "var(--line)", "stroke-dasharray": "3 3" });
+            mxEl("title", {}, vazio, "L" + (i + 1) + " C" + (j + 1) + ": sem tecla");
+            return;
+          }
+          var g = mxEl("g", { "class": "mx-btn", tabindex: 0, role: "button", "aria-label": "Botão L" + (i + 1) + " C" + (j + 1) });
+          var r = mxEl("rect", { x: x - 13, y: y - 13, width: 26, height: 26, rx: 5, fill: "var(--surface)", stroke: "var(--muted)", "stroke-width": 1.2 }, g);
+          mxEl("text", { x: x, y: y + 3.5, "text-anchor": "middle", fill: "var(--fg)", "font-family": mono, "font-size": 9.5, "font-weight": 600 }, g, k != null ? String(k) : "");
+          botoesEl[i + "," + j] = r;
+          g.addEventListener("click", function () { selecionar(i, j); });
+          g.addEventListener("keydown", function (ev) {
+            if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); selecionar(i, j); }
+          });
+        })(li, cj);
+      }
+    }
+    mxEl("text", { x: w - 12, y: h - 4, "text-anchor": "end", fill: "var(--muted)", "font-family": mono, "font-size": 9 }, null,
+      b.chave ? "número = SW do esquemático; tracejado = sem tecla" : "cada quadrado é um botão");
+  }
+
+  function acenderPinos(lista) {
+    pinosAcesos.forEach(function (p) { if (pinEl[p]) pinEl[p].setAttribute("class", "pin"); });
+    pinosAcesos = lista;
+    lista.forEach(function (p) { if (pinEl[p]) pinEl[p].setAttribute("class", "pin hit"); });
+  }
+
+  function selecionar(i, j) {
+    var b = atual, cor = "var(--" + b.id + ")";
+    if (sel) {
+      linhasEl[sel[0]].setAttribute("stroke", "var(--line)"); linhasEl[sel[0]].setAttribute("stroke-width", 1.6);
+      colunasEl[sel[1]].setAttribute("stroke", "var(--line)"); colunasEl[sel[1]].setAttribute("stroke-width", 1.6);
+      var antigo = botoesEl[sel[0] + "," + sel[1]];
+      if (antigo) antigo.setAttribute("fill", "var(--surface)");
+    }
+    sel = [i, j];
+    linhasEl[i].setAttribute("stroke", cor); linhasEl[i].setAttribute("stroke-width", 3.5);
+    colunasEl[j].setAttribute("stroke", cor); colunasEl[j].setAttribute("stroke-width", 3.5);
+    if (botoesEl[i + "," + j]) botoesEl[i + "," + j].setAttribute("fill", cor);
+    acenderPinos([b.L[i], b.C[j]]);
+
+    var L = "L" + (i + 1), C = "C" + (j + 1), dL = "D" + b.L[i], dC = "D" + b.C[j];
+    var pre = b.id === "fms" ? "" : b.id.toUpperCase() + " ";
+    var k = b.chave ? b.chave[i][j] : null;
+    var fim = k == null ? "" : " SW" + k;
+    steps.innerHTML =
+      "<ol>" +
+      "<li>Na vez da linha " + L + ", o firmware põe <strong>" + dL + "</strong> em LOW. As outras linhas ficam soltas.</li>" +
+      "<li>Todas as colunas são lidas com pull-up interno. Coluna sem botão apertado lê HIGH.</li>" +
+      "<li>Com o botão apertado, " + dL + " encosta em <strong>" + dC + "</strong> (coluna " + C + "), que passa a ler LOW.</li>" +
+      "<li>LOW em " + C + " durante a vez de " + L + " só pode ser este botão. Depois de 3 leituras iguais, cerca de 15 ms, o Mega envia:</li>" +
+      "</ol>" +
+      "<pre>P " + pre + L + " " + C + fim + "</pre>" +
+      "<p>Ao soltar, vem a mesma linha com <code>R</code> no lugar do <code>P</code>. A varredura passa pelas " + b.L.length + " linhas a cada 5 ms, então nenhum aperto escapa.</p>" +
+      "<p class=\"ghost\">A placa não tem diodos: apertar três botões que formem três cantos de um retângulo faz o quarto canto parecer apertado. Aperte um botão de cada vez.</p>";
+  }
+
+  var tabs = document.querySelectorAll(".tabs button");
+  function escolher(id) {
+    desenharMatriz(id);
+    tabs.forEach(function (o) { o.setAttribute("aria-pressed", o.getAttribute("data-m") === id ? "true" : "false"); });
+    if (id === "fms") selecionar(2, 6); else selecionar(1, 4);
+  }
+  tabs.forEach(function (btn) { btn.addEventListener("click", function () { escolher(btn.getAttribute("data-m")); }); });
+  escolher("fms");
 
   // Filtros
   var buttons = document.querySelectorAll(".filters button");
