@@ -189,7 +189,7 @@ img { max-width: 100%; }
       if (r.kind === "L") el("rect", { x: x - 7, y: y - 7, width: 14, height: 14, fill: COLOR[r.g], stroke: "#0b1622", "stroke-width": 1 }, g);
       else el("circle", { cx: x, cy: y, r: 7.5, fill: COLOR[r.g], stroke: "#0b1622", "stroke-width": 1 }, g);
     } else if (r.g === "free") {
-      tip += " = livre";
+      tip += r.semMatriz ? " = livre para outro uso, nunca para matriz (" + r.semMatriz + ")" : " = livre";
       el("rect", { x: x - 6, y: y - 6, width: 12, height: 12, fill: "var(--header)", stroke: "var(--free)", "stroke-width": 1.6 }, g);
     } else {
       tip += r.g === "serial" ? " = serial do USB, não usar" : r.g === "alias" ? " = repetição do " + r.same + ", não usar: ligue no " + r.same : " = energia/referência, não usar";
