@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pinagem do Mega BlackHawk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: placa desenhada em escala no topo, filtros por matriz, depois uma ficha de fiação por placa. */
+:root {
+  --bg: #eef2f6;
+  --surface: #ffffff;
+  --fg: #16202b;
+  --muted: #5a6878;
+  --line: #d3dbe4;
+  --pcb: #12519a;
+  --pcb-edge: #0b3a72;
+  --silk: #e8f0fb;
+  --header: #1a1d22;
+  --fms: #f2a93b;
+  --m1: #4fd39a;
+  --m2: #f27ab9;
+  --free: #ffffff;
+  --off: #7d8a99;
+  --chip-fms: #b86e00;
+  --chip-m1: #12804f;
+  --chip-m2: #b3306f;
+  --font-display: "Barlow Semi Condensed", "Arial Narrow", sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f141a; --surface: #171e26; --fg: #e4eaf1; --muted: #93a1b1; --line: #2a3542;
+    --chip-fms: #f2a93b; --chip-m1: #4fd39a; --chip-m2: #f27ab9;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f141a; --surface: #171e26; --fg: #e4eaf1; --muted: #93a1b1; --line: #2a3542;
+  --chip-fms: #f2a93b; --chip-m1: #4fd39a; --chip-m2: #f27ab9;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 48px; display: grid; gap: 22px; }
+header h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(26px, 4vw, 36px); line-height: 1.1; margin: 0; text-wrap: balance; }
+header p { margin: 6px 0 0; color: var(--muted); max-width: 70ch; }
+.fw { font-family: var(--font-mono); font-size: 13px; color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; }
+
+.filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.filters button { font: 600 14px var(--font-body); color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+.filters button[aria-pressed="true"] { border-color: var(--fg); box-shadow: inset 0 0 0 1px var(--fg); }
+.filters button:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+.board { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px; overflow-x: auto; }
+.board svg { display: block; width: 100%; min-width: 760px; height: auto; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 20px; color: var(--muted); font-size: 13px; padding: 10px 4px 2px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+svg .pin { transition: opacity .2s; }
+svg.focus-fms .pin:not([data-g="fms"]),
+svg.focus-m1 .pin:not([data-g="m1"]),
+svg.focus-m2 .pin:not([data-g="m2"]) { opacity: .16; }
+@media (prefers-reduced-motion: reduce) { svg .pin { transition: none; } }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; min-width: 0; display: grid; gap: 10px; align-content: start; }
+.card h2 { font-family: var(--font-display); font-weight: 700; font-size: 22px; margin: 0; display: flex; align-items: center; gap: 10px; }
+.card h2 small { font: 500 13px var(--font-mono); color: var(--muted); }
+.card p { margin: 0; color: var(--muted); font-size: 14px; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+th { font: 600 11px var(--font-body); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+td.pinv { font-family: var(--font-mono); font-weight: 600; }
+.tables { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.warn { border-left: 3px solid var(--chip-fms); padding: 6px 10px; font-size: 13.5px; color: var(--fg); background: color-mix(in srgb, var(--fms) 10%, transparent); border-radius: 0 6px 6px 0; }
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.notes .card p { color: var(--fg); }
+code { font-family: var(--font-mono); font-size: .92em; }
+body { margin: 0; }
+img { max-width: 100%; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>Pinagem do Mega: teclado FMS e duas placas de 32 botões</h1>
+    <p>Mega 2560 visto de cima, com o USB à esquerda como na sua foto. Cada pino colorido é de uma matriz: quadrado é <strong>linha</strong>, círculo é <strong>coluna</strong>. Vale para o firmware <span class="fw">FMS pronto v6</span>.</p>
+  </header>
+
+  <div class="filters" role="group" aria-label="Destacar uma matriz">
+    <button type="button" id="f-all" data-f="all" aria-pressed="true">Todas</button>
+    <button type="button" id="f-fms" data-f="fms" aria-pressed="false"><span class="dot" style="background:var(--fms)"></span>Teclado FMS 7×12</button>
+    <button type="button" id="f-m1" data-f="m1" aria-pressed="false"><span class="dot" style="background:var(--m1)"></span>Placa 1 (M1) 4×8</button>
+    <button type="button" id="f-m2" data-f="m2" aria-pressed="false"><span class="dot" style="background:var(--m2)"></span>Placa 2 (M2) 4×8</button>
+  </div>
+
+  <div class="board">
+    <svg id="mega" viewBox="0 0 1010 570" role="img" aria-label="Desenho do Arduino Mega 2560 com os pinos de cada matriz coloridos"></svg>
+    <div class="legend">
+      <span><svg width="12" height="12"><rect x="1" y="1" width="10" height="10" fill="var(--off)"/></svg> linha (L)</span>
+      <span><svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="var(--off)"/></svg> coluna (C)</span>
+      <span><svg width="12" height="12"><rect x="1.5" y="1.5" width="9" height="9" fill="none" stroke="var(--off)" stroke-width="1.5"/></svg> livre</span>
+      <span><svg width="12" height="12"><rect x="1" y="1" width="10" height="10" fill="var(--header)" stroke="var(--off)"/></svg> não usar (serial do USB, energia)</span>
+    </div>
+  </div>
+
+  <div class="cards" id="cards"></div>
+
+  <div class="notes">
+    <div class="card">
+      <h2>Livres</h2>
+      <p><code>D13</code>, <code>D14</code> a <code>D21</code> e <code>A0</code> a <code>A15</code>. O D13 fica livre de propósito: ele tem o LED da placa, que puxa o pino para baixo e faria uma coluna inteira parecer apertada.</p>
+    </div>
+    <div class="card">
+      <h2>Não usar</h2>
+      <p><code>D0</code> e <code>D1</code> são a serial do USB, que o Painel usa. GND, 5V, 3.3V e VIN não entram em nenhuma matriz: nenhum fio de placa vai neles.</p>
+    </div>
+    <div class="card">
+      <h2>Teste sem placa</h2>
+      <p>Jumper <code>D22–D23</code> dá <code>P L1 C1 SW0</code>, <code>D2–D6</code> dá <code>P M1 L1 C1</code>, <code>D5–D44</code> dá <code>P M1 L4 C8</code>, <code>D36–D46</code> dá <code>P M2 L1 C1</code>. Nenhum pino vai a HIGH, então fio no lugar errado não queima nada.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var NS = "http://www.w3.org/2000/svg";
+  var svg = document.getElementById("mega");
+
+  // Papel de cada pino no firmware v6.
+  var role = {};
+  function set(pins, g, kind) { pins.forEach(function (p, i) { role[p] = { g: g, kind: kind, i: i + 1 }; }); }
+  set(["22","24","26","28","30","32","34"], "fms", "L");
+  set(["23","25","27","29","31","33","35","37","39","41","43","45"], "fms", "C");
+  set(["2","3","4","5"], "m1", "L");
+  set(["6","7","8","9","10","11","12","44"], "m1", "C");
+  set(["36","38","40","42"], "m2", "L");
+  set(["46","47","48","49","50","51","52","53"], "m2", "C");
+  ["0","1"].forEach(function (p) { role[p] = { g: "serial" }; });
+  ["13","14","15","16","17","18","19","20","21","SCL","SDA"].forEach(function (p) { role[p] = { g: "free" }; });
+  for (var a = 0; a < 16; a++) role["A" + a] = { g: "free" };
+
+  var COLOR = { fms: "var(--fms)", m1: "var(--m1)", m2: "var(--m2)" };
+  var NAME = { fms: "FMS", m1: "M1", m2: "M2" };
+
+  function el(tag, attrs, parent, text) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (text != null) e.textContent = text;
+    (parent || svg).appendChild(e);
+    return e;
+  }
+  function label(p) { return /^\d+$/.test(p) ? "D" + p : p; }
+
+  // Pino: desenha forma e devolve o grupo; tag = texto do papel.
+  function pin(p, x, y) {
+    var r = role[p] || { g: "power" };
+    var g = el("g", { "class": "pin", "data-g": r.g });
+    var tip = label(p);
+    if (r.kind) {
+      tip += " = " + NAME[r.g] + " " + (r.kind === "L" ? "linha L" : "coluna C") + r.i;
+      if (r.kind === "L") el("rect", { x: x - 7, y: y - 7, width: 14, height: 14, fill: COLOR[r.g], stroke: "#0b1622", "stroke-width": 1 }, g);
+      else el("circle", { cx: x, cy: y, r: 7.5, fill: COLOR[r.g], stroke: "#0b1622", "stroke-width": 1 }, g);
+    } else if (r.g === "free") {
+      tip += " = livre";
+      el("rect", { x: x - 6, y: y - 6, width: 12, height: 12, fill: "var(--header)", stroke: "var(--free)", "stroke-width": 1.6 }, g);
+    } else {
+      tip += r.g === "serial" ? " = serial do USB, não usar" : " = energia/referência, não usar";
+      el("rect", { x: x - 6, y: y - 6, width: 12, height: 12, fill: "var(--header)", stroke: "var(--off)", "stroke-width": 1 }, g);
+      el("circle", { cx: x, cy: y, r: 2.4, fill: "var(--off)" }, g);
+    }
+    el("title", {}, g, tip);
+    return { g: g, r: r };
+  }
+  function tagText(r) { return r.kind ? r.kind + r.i : ""; }
+
+  // Placa
+  el("rect", { x: 34, y: 24, width: 962, height: 520, rx: 14, fill: "var(--pcb)", stroke: "var(--pcb-edge)", "stroke-width": 3 });
+  el("rect", { x: 0, y: 92, width: 112, height: 82, rx: 4, fill: "#b9c2cc", stroke: "#7c8792" });
+  el("text", { x: 56, y: 138, "text-anchor": "middle", fill: "#33404d", "font-family": "IBM Plex Mono, monospace", "font-size": 13, "font-weight": 600 }, null, "USB");
+  el("rect", { x: 8, y: 404, width: 92, height: 70, rx: 4, fill: "#15181c", stroke: "#3a414a" });
+  el("text", { x: 54, y: 444, "text-anchor": "middle", fill: "#8d97a3", "font-family": "IBM Plex Mono, monospace", "font-size": 11 }, null, "7–12 V");
+  el("rect", { x: 430, y: 210, width: 150, height: 150, rx: 6, fill: "#16191d", stroke: "#3a414a", transform: "rotate(45 505 285)" });
+  el("text", { x: 505, y: 290, "text-anchor": "middle", fill: "#9aa5b1", "font-family": "IBM Plex Mono, monospace", "font-size": 12 }, null, "ATmega2560");
+  el("circle", { cx: 700, cy: 250, r: 13, fill: "#c94a4a", stroke: "#e8e8e8", "stroke-width": 3 });
+  el("text", { x: 700, y: 280, "text-anchor": "middle", fill: "var(--silk)", "font-family": "IBM Plex Sans, sans-serif", "font-size": 10 }, null, "RESET");
+  el("text", { x: 660, y: 420, "text-anchor": "middle", fill: "var(--silk)", "font-family": "Barlow Semi Condensed, sans-serif", "font-size": 30, "font-weight": 700, "letter-spacing": 2 }, null, "MEGA 2560");
+  el("circle", { cx: 150, cy: 214, r: 5, fill: "#ffd166" });
+  el("text", { x: 162, y: 218, fill: "var(--silk)", "font-family": "IBM Plex Mono, monospace", "font-size": 10 }, null, "LED do D13");
+
+  // Barras de cima e de baixo
+  var PITCH = 24;
+  function row(pins, x0, y, below) {
+    el("rect", { x: x0 - 13, y: y - 12, width: pins.length * PITCH + 2, height: 24, rx: 2, fill: "var(--header)" });
+    pins.forEach(function (p, i) {
+      var x = x0 + i * PITCH, res = pin(p, x, y);
+      var dy = below ? 1 : -1;
+      el("text", { x: x, y: y + dy * 24 + (below ? 4 : 0), "text-anchor": "middle", fill: "var(--silk)", "font-family": "IBM Plex Mono, monospace", "font-size": p.length >= 5 ? 7 : p.length >= 3 ? 8.5 : 10.5, "font-weight": 500 }, res.g, p);
+      if (res.r.kind) {
+        el("text", { x: x, y: y + dy * 38 + (below ? 4 : 0), "text-anchor": "middle", fill: COLOR[res.r.g], "font-family": "IBM Plex Mono, monospace", "font-size": 10, "font-weight": 600 }, res.g, NAME[res.r.g]);
+        el("text", { x: x, y: y + dy * 50 + (below ? 4 : 0), "text-anchor": "middle", fill: COLOR[res.r.g], "font-family": "IBM Plex Mono, monospace", "font-size": 10, "font-weight": 600 }, res.g, tagText(res.r));
+      }
+    });
+  }
+  row(["SCL","SDA","AREF","GND","13","12","11","10","9","8"], 236, 46, true);
+  row(["7","6","5","4","3","2","1","0"], 490, 46, true);
+  row(["14","15","16","17","18","19","20","21"], 690, 46, true);
+  var A1 = [], A2 = [];
+  for (var k = 0; k < 8; k++) { A1.push("A" + k); A2.push("A" + (k + 8)); }
+  row(["NC","IOREF","RESET","3.3V","5V","GND","GND","VIN"], 236, 522, false);
+  row(A1, 470, 522, false);
+  row(A2, 676, 522, false);
+  el("text", { x: 320, y: 470, "text-anchor": "middle", fill: "var(--silk)", "font-family": "IBM Plex Sans, sans-serif", "font-size": 10, "letter-spacing": 1 }, null, "POWER");
+  el("text", { x: 650, y: 470, "text-anchor": "middle", fill: "var(--silk)", "font-family": "IBM Plex Sans, sans-serif", "font-size": 10, "letter-spacing": 1 }, null, "ANALOG IN");
+  el("text", { x: 380, y: 122, "text-anchor": "middle", fill: "var(--silk)", "font-family": "IBM Plex Sans, sans-serif", "font-size": 10, "letter-spacing": 1 }, null, "PWM");
+  el("text", { x: 774, y: 122, "text-anchor": "middle", fill: "var(--silk)", "font-family": "IBM Plex Sans, sans-serif", "font-size": 10, "letter-spacing": 1 }, null, "COMMUNICATION");
+
+  // Barra dupla da direita: par na coluna de dentro, ímpar na de fora
+  var XI = 906, XO = 930, Y0 = 108, RP = 23;
+  el("rect", { x: XI - 13, y: Y0 - 12, width: 50, height: 18 * RP + 1, rx: 2, fill: "var(--header)" });
+  var dbl = [["5V","5V"]];
+  for (var n = 22; n <= 52; n += 2) dbl.push([String(n), String(n + 1)]);
+  dbl.push(["GND","GND"]);
+  dbl.forEach(function (pr, i) {
+    var y = Y0 + i * RP;
+    var a = pin(pr[0], XI, y), b = pin(pr[1], XO, y);
+    el("text", { x: XI - 16, y: y + 4, "text-anchor": "end", fill: "var(--silk)", "font-family": "IBM Plex Mono, monospace", "font-size": 10.5, "font-weight": 500 }, a.g, pr[0]);
+    if (a.r.kind) el("text", { x: XI - 40, y: y + 4, "text-anchor": "end", fill: COLOR[a.r.g], "font-family": "IBM Plex Mono, monospace", "font-size": 10.5, "font-weight": 600 }, a.g, NAME[a.r.g] + " " + tagText(a.r));
+    el("text", { x: XO + 14, y: y + 4, "text-anchor": "start", fill: "var(--silk)", "font-family": "IBM Plex Mono, monospace", "font-size": 10.5, "font-weight": 500 }, b.g, pr[1]);
+    if (b.r.kind) el("text", { x: XO + 14, y: y + 4, dx: 20, "text-anchor": "start", fill: COLOR[b.r.g], "font-family": "IBM Plex Mono, monospace", "font-size": 9, "font-weight": 600 }, b.g, tagText(b.r));
+  });
+
+  // Fichas por placa
+  var BOARDS = [
+    { id: "fms", title: "Teclado FMS", sub: "7 linhas × 12 colunas, 79 teclas", L: ["22","24","26","28","30","32","34"], C: ["23","25","27","29","31","33","35","37","39","41","43","45"],
+      note: "Tudo na barra dupla: linhas na coluna de dentro (pares), colunas na de fora (ímpares). São 19 fios." },
+    { id: "m1", title: "Placa 1", sub: "M1, 4 × 8, 32 botões", L: ["2","3","4","5"], C: ["6","7","8","9","10","11","12","44"],
+      note: "Linhas e C1 a C7 na barra de cima. A C8 vai no D44, na barra dupla, lado de dentro, na mesma fileira do D45 (C12 do FMS): confira o furo antes de espetar." },
+    { id: "m2", title: "Placa 2", sub: "M2, 4 × 8, 32 botões", L: ["36","38","40","42"], C: ["46","47","48","49","50","51","52","53"],
+      note: "Tudo na barra dupla, logo abaixo do FMS. As colunas ocupam as quatro últimas fileiras, dos dois lados." }
+  ];
+  var cards = document.getElementById("cards");
+  BOARDS.forEach(function (b) {
+    function rows(list, k) {
+      return list.map(function (p, i) { return "<tr><td>" + k + (i + 1) + "</td><td class=\"pinv\">D" + p + "</td></tr>"; }).join("");
+    }
+    var c = document.createElement("div");
+    c.className = "card";
+    c.innerHTML = "<h2><span class=\"dot\" style=\"background:var(--" + b.id + ");width:14px;height:14px\"></span>" + b.title + " <small>" + b.sub + "</small></h2>" +
+      "<div class=\"tables\"><table><thead><tr><th>Linha</th><th>Pino</th></tr></thead><tbody>" + rows(b.L, "L") + "</tbody></table>" +
+      "<table><thead><tr><th>Coluna</th><th>Pino</th></tr></thead><tbody>" + rows(b.C, "C") + "</tbody></table></div>" +
+      (b.id === "m1" ? "<div class=\"warn\">" + b.note + "</div>" : "<p>" + b.note + "</p>");
+    cards.appendChild(c);
+  });
+
+  // Filtros
+  var buttons = document.querySelectorAll(".filters button");
+  buttons.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var f = btn.getAttribute("data-f");
+      svg.setAttribute("class", f === "all" ? "" : "focus-" + f);
+      buttons.forEach(function (o) { o.setAttribute("aria-pressed", o === btn ? "true" : "false"); });
+    });
+  });
+})();
+</script>
+</body>
+</html>
