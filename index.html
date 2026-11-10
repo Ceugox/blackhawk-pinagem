@@ -192,7 +192,7 @@ img { max-width: 100%; }
       tip += " = livre";
       el("rect", { x: x - 6, y: y - 6, width: 12, height: 12, fill: "var(--header)", stroke: "var(--free)", "stroke-width": 1.6 }, g);
     } else {
-      tip += r.g === "serial" ? " = serial do USB, não usar" : r.g === "alias" ? " = mesmo sinal que o " + r.same + ", não usar junto" : " = energia/referência, não usar";
+      tip += r.g === "serial" ? " = serial do USB, não usar" : r.g === "alias" ? " = repetição do " + r.same + ", não usar: ligue no " + r.same : " = energia/referência, não usar";
       el("rect", { x: x - 6, y: y - 6, width: 12, height: 12, fill: "var(--header)", stroke: "var(--off)", "stroke-width": 1 }, g);
       el("circle", { cx: x, cy: y, r: 2.4, fill: "var(--off)" }, g);
     }
@@ -241,6 +241,18 @@ img { max-width: 100%; }
   row(["SCL","SDA","AREF","GND","13","12","11","10","9","8"], 236, 46, true);
   row(["7","6","5","4","3","2","1","0"], 490, 46, true);
   row(["14","15","16","17","18","19","20","21"], 690, 46, true);
+
+  // Setas da serimpressao do Mega no D1 (TX0, o Mega envia) e no D0 (RX0, o Mega recebe).
+  function seta(x, y, paraDireita) {
+    var d = paraDireita ? 1 : -1;
+    el("line", { x1: x - 8 * d, y1: y, x2: x + 4 * d, y2: y, stroke: "var(--silk)", "stroke-width": 1.4 });
+    el("path", { d: "M" + (x + 8 * d) + " " + y + " L" + (x + 2 * d) + " " + (y - 4) + " L" + (x + 2 * d) + " " + (y + 4) + " Z", fill: "var(--silk)" });
+  }
+  [["1", "TX0", true], ["0", "RX0", false]].forEach(function (t) {
+    var x = 490 + ["7","6","5","4","3","2","1","0"].indexOf(t[0]) * PITCH;
+    el("text", { x: x, y: 89, "text-anchor": "middle", fill: "var(--silk)", "font-family": "IBM Plex Mono, monospace", "font-size": 8.5, "font-weight": 600 }, null, t[1]);
+    seta(x, 99, t[2]);
+  });
   var A1 = [], A2 = [];
   for (var k = 0; k < 8; k++) { A1.push("A" + k); A2.push("A" + (k + 8)); }
   row(["NC","IOREF","RESET","3.3V","5V","GND","GND","VIN"], 236, 522, false);
