@@ -15,4 +15,6 @@ Simulador-BlackHawk (privado). Mudou um pino no firmware, mude a lista
 node ci/check.js
 ```
 
-Falha se um pino estiver em duas matrizes ou se o desenho tiver um pino sem papel.
+Falha se um pino estiver em duas matrizes, numa matriz em pino proibido (serial,
+energia, SCL/SDA), desenhado sem papel ou listado em `BOARDS` sem aparecer no
+desenho. Também planta três defeitos e exige que o detector pegue cada um.

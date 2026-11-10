@@ -106,7 +106,7 @@ img { max-width: 100%; }
       <span><svg width="12" height="12"><rect x="1" y="1" width="10" height="10" fill="var(--off)"/></svg> linha (L)</span>
       <span><svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="var(--off)"/></svg> coluna (C)</span>
       <span><svg width="12" height="12"><rect x="1.5" y="1.5" width="9" height="9" fill="var(--header)" stroke="var(--fg)" stroke-width="1.5"/></svg> livre</span>
-      <span><svg width="12" height="12"><rect x="1" y="1" width="10" height="10" fill="var(--header)" stroke="var(--off)"/></svg> não usar (serial do USB, energia)</span>
+      <span><svg width="12" height="12"><rect x="1" y="1" width="10" height="10" fill="var(--header)" stroke="var(--off)"/></svg> não usar (serial do USB, energia, SCL/SDA repetidos)</span>
     </div>
   </div>
 
@@ -115,7 +115,7 @@ img { max-width: 100%; }
   <div class="notes">
     <div class="card">
       <h2>Livres</h2>
-      <p><code>D13</code>, <code>D14</code> a <code>D21</code> e <code>A0</code> a <code>A15</code>. Os furos SCL e SDA da barra de cima são o mesmo sinal que o D21 e o D20: use um ou outro, nunca os dois. O D13 fica livre de propósito: ele tem o LED da placa, que puxa o pino para baixo e faria uma coluna inteira parecer apertada.</p>
+      <p><code>D13</code>, <code>D14</code> a <code>D21</code> e <code>A0</code> a <code>A15</code>. Os furos SCL e SDA da barra de cima são os mesmos pinos D21 e D20, repetidos. No desenho eles aparecem como "não usar" para o mesmo sinal não ser ligado duas vezes: use o D20 e o D21. O D13 fica livre de propósito: ele tem o LED da placa, que puxa o pino para baixo e faria uma coluna inteira parecer apertada.</p>
     </div>
     <div class="card">
       <h2>Não usar</h2>
@@ -144,20 +144,25 @@ img { max-width: 100%; }
       note: "Tudo na barra dupla, logo abaixo do FMS. As colunas ocupam as quatro últimas fileiras, dos dois lados." }
   ];
 
-  var role = {}, conflitos = [];
+  function label(p) { return /^\d+$/.test(p) ? "D" + p : p; }
+
+  // Papeis fixos primeiro; uma matriz so pode ocupar pino livre.
+  var role = {}, conflitos = [], desenhados = {};
+  ["0","1"].forEach(function (p) { role[p] = { g: "serial" }; });
+  ["13","14","15","16","17","18","19","20","21"].forEach(function (p) { role[p] = { g: "free" }; });
+  for (var n = 22; n <= 53; n++) role[String(n)] = { g: "free" };
+  for (var q = 2; q <= 12; q++) role[String(q)] = { g: "free" };
+  for (var a = 0; a < 16; a++) role["A" + a] = { g: "free" };
+  role.SCL = { g: "alias", same: "D21" };
+  role.SDA = { g: "alias", same: "D20" };
+  ["NC","IOREF","RESET","3.3V","5V","GND","VIN","AREF"].forEach(function (p) { role[p] = { g: "power" }; });
   function set(pins, g, kind) {
     pins.forEach(function (p, i) {
-      if (role[p]) conflitos.push("D" + p);
+      if (!role[p] || role[p].g !== "free") conflitos.push(label(p) + " (" + g + ")");
       role[p] = { g: g, kind: kind, i: i + 1 };
     });
   }
   BOARDS.forEach(function (b) { set(b.L, b.id, "L"); set(b.C, b.id, "C"); });
-  ["0","1"].forEach(function (p) { role[p] = { g: "serial" }; });
-  ["13","14","15","16","17","18","19","20","21"].forEach(function (p) { role[p] = { g: "free" }; });
-  role.SCL = { g: "alias", same: "D21" };
-  role.SDA = { g: "alias", same: "D20" };
-  ["NC","IOREF","RESET","3.3V","5V","GND","VIN","AREF"].forEach(function (p) { role[p] = { g: "power" }; });
-  for (var a = 0; a < 16; a++) role["A" + a] = { g: "free" };
 
   var COLOR = { fms: "var(--fms)", m1: "var(--m1)", m2: "var(--m2)" };
   var NAME = { fms: "FMS", m1: "M1", m2: "M2" };
@@ -169,10 +174,10 @@ img { max-width: 100%; }
     (parent || svg).appendChild(e);
     return e;
   }
-  function label(p) { return /^\d+$/.test(p) ? "D" + p : p; }
 
   // Pino: desenha forma e devolve o grupo; tag = texto do papel.
   function pin(p, x, y) {
+    desenhados[p] = true;
     var r = role[p];
     if (!r) { conflitos.push(p + " sem papel"); r = { g: "power" }; }
     var g = el("g", { "class": "pin", "data-g": r.g });
@@ -200,7 +205,16 @@ img { max-width: 100%; }
   el("text", { x: 56, y: 138, "text-anchor": "middle", fill: "#33404d", "font-family": "IBM Plex Mono, monospace", "font-size": 13, "font-weight": 600 }, null, "USB");
   el("rect", { x: 8, y: 404, width: 92, height: 70, rx: 4, fill: "#15181c", stroke: "#3a414a" });
   el("text", { x: 54, y: 444, "text-anchor": "middle", fill: "#8d97a3", "font-family": "IBM Plex Mono, monospace", "font-size": 11 }, null, "7–12 V");
-  el("rect", { x: 430, y: 210, width: 150, height: 150, rx: 6, fill: "#16191d", stroke: "#3a414a", transform: "rotate(45 505 285)" });
+  // ATmega2560 (TQFP-100): quadrado alinhado com a placa, 25 terminais por lado.
+  for (var t = 0; t < 25; t++) {
+    var o = 449 + t * 4.7;
+    el("rect", { x: o, y: 219, width: 2.2, height: 8, fill: "#b9c2cc" });
+    el("rect", { x: o, y: 343, width: 2.2, height: 8, fill: "#b9c2cc" });
+    el("rect", { x: 439, y: o - 220, width: 8, height: 2.2, fill: "#b9c2cc" });
+    el("rect", { x: 563, y: o - 220, width: 8, height: 2.2, fill: "#b9c2cc" });
+  }
+  el("rect", { x: 447, y: 227, width: 116, height: 116, rx: 3, fill: "#16191d", stroke: "#3a414a" });
+  el("circle", { cx: 457, cy: 237, r: 3, fill: "#3a414a" });
   el("text", { x: 505, y: 290, "text-anchor": "middle", fill: "#9aa5b1", "font-family": "IBM Plex Mono, monospace", "font-size": 12 }, null, "ATmega2560");
   el("circle", { cx: 700, cy: 250, r: 13, fill: "#c94a4a", stroke: "#e8e8e8", "stroke-width": 3 });
   el("text", { x: 700, y: 280, "text-anchor": "middle", fill: "var(--silk)", "font-family": "IBM Plex Sans, sans-serif", "font-size": 10 }, null, "RESET");
@@ -250,6 +264,9 @@ img { max-width: 100%; }
     if (b.r.kind) el("text", { x: XO + 14, y: y + 4, dx: 20, "text-anchor": "start", fill: COLOR[b.r.g], "font-family": "IBM Plex Mono, monospace", "font-size": 9, "font-weight": 600 }, b.g, tagText(b.r));
   });
 
+  BOARDS.forEach(function (b) {
+    b.L.concat(b.C).forEach(function (p) { if (!desenhados[p]) conflitos.push(label(p) + " fora do desenho"); });
+  });
   if (conflitos.length) {
     var w = document.createElement("div");
     w.className = "warn";
