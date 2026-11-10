@@ -153,12 +153,14 @@ img { max-width: 100%; }
   for (var n = 22; n <= 53; n++) role[String(n)] = { g: "free" };
   for (var q = 2; q <= 12; q++) role[String(q)] = { g: "free" };
   for (var a = 0; a < 16; a++) role["A" + a] = { g: "free" };
+  role["13"] = { g: "free", semMatriz: "LED da placa" };
   role.SCL = { g: "alias", same: "D21" };
   role.SDA = { g: "alias", same: "D20" };
   ["NC","IOREF","RESET","3.3V","5V","GND","VIN","AREF"].forEach(function (p) { role[p] = { g: "power" }; });
   function set(pins, g, kind) {
     pins.forEach(function (p, i) {
-      if (!role[p] || role[p].g !== "free") conflitos.push(label(p) + " (" + g + ")");
+      if (!role[p] || role[p].g !== "free") conflitos.push(label(p) + " proibido (" + g + ")");
+      else if (role[p].semMatriz) conflitos.push(label(p) + " proibido em matriz: " + role[p].semMatriz + " (" + g + ")");
       role[p] = { g: g, kind: kind, i: i + 1 };
     });
   }
