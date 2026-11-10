@@ -90,7 +90,7 @@ img { max-width: 100%; }
 <div class="wrap">
   <header>
     <h1>Pinagem do Mega: teclado FMS e duas placas de 32 botões</h1>
-    <p>Mega 2560 visto de cima, com o USB à esquerda como na sua foto. Cada pino colorido é de uma matriz: quadrado é <strong>linha</strong>, círculo é <strong>coluna</strong>. Vale para o firmware <span class="fw">FMS pronto v6</span>.</p>
+    <p>Mega 2560 visto de cima, com o USB à esquerda. Cada pino colorido é de uma matriz: quadrado é <strong>linha</strong>, círculo é <strong>coluna</strong>. Vale para o firmware <span class="fw">FMS pronto v6</span>.</p>
   </header>
 
   <div class="filters" role="group" aria-label="Destacar uma matriz">
@@ -105,7 +105,7 @@ img { max-width: 100%; }
     <div class="legend">
       <span><svg width="12" height="12"><rect x="1" y="1" width="10" height="10" fill="var(--off)"/></svg> linha (L)</span>
       <span><svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="var(--off)"/></svg> coluna (C)</span>
-      <span><svg width="12" height="12"><rect x="1.5" y="1.5" width="9" height="9" fill="none" stroke="var(--off)" stroke-width="1.5"/></svg> livre</span>
+      <span><svg width="12" height="12"><rect x="1.5" y="1.5" width="9" height="9" fill="var(--header)" stroke="var(--fg)" stroke-width="1.5"/></svg> livre</span>
       <span><svg width="12" height="12"><rect x="1" y="1" width="10" height="10" fill="var(--header)" stroke="var(--off)"/></svg> não usar (serial do USB, energia)</span>
     </div>
   </div>
@@ -115,7 +115,7 @@ img { max-width: 100%; }
   <div class="notes">
     <div class="card">
       <h2>Livres</h2>
-      <p><code>D13</code>, <code>D14</code> a <code>D21</code> e <code>A0</code> a <code>A15</code>. O D13 fica livre de propósito: ele tem o LED da placa, que puxa o pino para baixo e faria uma coluna inteira parecer apertada.</p>
+      <p><code>D13</code>, <code>D14</code> a <code>D21</code> e <code>A0</code> a <code>A15</code>. Os furos SCL e SDA da barra de cima são o mesmo sinal que o D21 e o D20: use um ou outro, nunca os dois. O D13 fica livre de propósito: ele tem o LED da placa, que puxa o pino para baixo e faria uma coluna inteira parecer apertada.</p>
     </div>
     <div class="card">
       <h2>Não usar</h2>
@@ -123,7 +123,7 @@ img { max-width: 100%; }
     </div>
     <div class="card">
       <h2>Teste sem placa</h2>
-      <p>Jumper <code>D22–D23</code> dá <code>P L1 C1 SW0</code>, <code>D2–D6</code> dá <code>P M1 L1 C1</code>, <code>D5–D44</code> dá <code>P M1 L4 C8</code>, <code>D36–D46</code> dá <code>P M2 L1 C1</code>. Nenhum pino vai a HIGH, então fio no lugar errado não queima nada.</p>
+      <p>Jumper <code>D22–D23</code> dá <code>P L1 C1 SW0</code>, <code>D2–D6</code> dá <code>P M1 L1 C1</code>, <code>D5–D44</code> dá <code>P M1 L4 C8</code>, <code>D36–D46</code> dá <code>P M2 L1 C1</code>. Nenhum pino de matriz vai a HIGH, então trocar dois pinos de matriz entre si não queima nada. Mas nenhum fio pode encostar no 5V, 3.3V ou VIN: um pino em LOW ligado ao 5V entra em curto e pode danificar o Mega. O 5V fica na fileira logo acima do D22 e do D23.</p>
     </div>
   </div>
 </div>
@@ -133,17 +133,30 @@ img { max-width: 100%; }
   var NS = "http://www.w3.org/2000/svg";
   var svg = document.getElementById("mega");
 
-  // Papel de cada pino no firmware v6.
-  var role = {};
-  function set(pins, g, kind) { pins.forEach(function (p, i) { role[p] = { g: g, kind: kind, i: i + 1 }; }); }
-  set(["22","24","26","28","30","32","34"], "fms", "L");
-  set(["23","25","27","29","31","33","35","37","39","41","43","45"], "fms", "C");
-  set(["2","3","4","5"], "m1", "L");
-  set(["6","7","8","9","10","11","12","44"], "m1", "C");
-  set(["36","38","40","42"], "m2", "L");
-  set(["46","47","48","49","50","51","52","53"], "m2", "C");
+  // Pinagem do firmware v6 (firmware/fms_teclado/fms_teclado.ino do Simulador-BlackHawk).
+  // Fonte unica: o desenho e as fichas saem daqui.
+  var BOARDS = [
+    { id: "fms", title: "Teclado FMS", sub: "7 linhas × 12 colunas, 79 teclas", L: ["22","24","26","28","30","32","34"], C: ["23","25","27","29","31","33","35","37","39","41","43","45"],
+      note: "Tudo na barra dupla: linhas na coluna de dentro (pares), colunas na de fora (ímpares). São 19 fios." },
+    { id: "m1", title: "Placa 1", sub: "M1, 4 × 8, 32 botões", L: ["2","3","4","5"], C: ["6","7","8","9","10","11","12","44"],
+      note: "Linhas e C1 a C7 na barra de cima. A C8 vai no D44, na barra dupla, lado de dentro, na mesma fileira do D45 (C12 do FMS): confira o furo antes de espetar." },
+    { id: "m2", title: "Placa 2", sub: "M2, 4 × 8, 32 botões", L: ["36","38","40","42"], C: ["46","47","48","49","50","51","52","53"],
+      note: "Tudo na barra dupla, logo abaixo do FMS. As colunas ocupam as quatro últimas fileiras, dos dois lados." }
+  ];
+
+  var role = {}, conflitos = [];
+  function set(pins, g, kind) {
+    pins.forEach(function (p, i) {
+      if (role[p]) conflitos.push("D" + p);
+      role[p] = { g: g, kind: kind, i: i + 1 };
+    });
+  }
+  BOARDS.forEach(function (b) { set(b.L, b.id, "L"); set(b.C, b.id, "C"); });
   ["0","1"].forEach(function (p) { role[p] = { g: "serial" }; });
-  ["13","14","15","16","17","18","19","20","21","SCL","SDA"].forEach(function (p) { role[p] = { g: "free" }; });
+  ["13","14","15","16","17","18","19","20","21"].forEach(function (p) { role[p] = { g: "free" }; });
+  role.SCL = { g: "alias", same: "D21" };
+  role.SDA = { g: "alias", same: "D20" };
+  ["NC","IOREF","RESET","3.3V","5V","GND","VIN","AREF"].forEach(function (p) { role[p] = { g: "power" }; });
   for (var a = 0; a < 16; a++) role["A" + a] = { g: "free" };
 
   var COLOR = { fms: "var(--fms)", m1: "var(--m1)", m2: "var(--m2)" };
@@ -160,7 +173,8 @@ img { max-width: 100%; }
 
   // Pino: desenha forma e devolve o grupo; tag = texto do papel.
   function pin(p, x, y) {
-    var r = role[p] || { g: "power" };
+    var r = role[p];
+    if (!r) { conflitos.push(p + " sem papel"); r = { g: "power" }; }
     var g = el("g", { "class": "pin", "data-g": r.g });
     var tip = label(p);
     if (r.kind) {
@@ -171,7 +185,7 @@ img { max-width: 100%; }
       tip += " = livre";
       el("rect", { x: x - 6, y: y - 6, width: 12, height: 12, fill: "var(--header)", stroke: "var(--free)", "stroke-width": 1.6 }, g);
     } else {
-      tip += r.g === "serial" ? " = serial do USB, não usar" : " = energia/referência, não usar";
+      tip += r.g === "serial" ? " = serial do USB, não usar" : r.g === "alias" ? " = mesmo sinal que o " + r.same + ", não usar junto" : " = energia/referência, não usar";
       el("rect", { x: x - 6, y: y - 6, width: 12, height: 12, fill: "var(--header)", stroke: "var(--off)", "stroke-width": 1 }, g);
       el("circle", { cx: x, cy: y, r: 2.4, fill: "var(--off)" }, g);
     }
@@ -236,15 +250,13 @@ img { max-width: 100%; }
     if (b.r.kind) el("text", { x: XO + 14, y: y + 4, dx: 20, "text-anchor": "start", fill: COLOR[b.r.g], "font-family": "IBM Plex Mono, monospace", "font-size": 9, "font-weight": 600 }, b.g, tagText(b.r));
   });
 
-  // Fichas por placa
-  var BOARDS = [
-    { id: "fms", title: "Teclado FMS", sub: "7 linhas × 12 colunas, 79 teclas", L: ["22","24","26","28","30","32","34"], C: ["23","25","27","29","31","33","35","37","39","41","43","45"],
-      note: "Tudo na barra dupla: linhas na coluna de dentro (pares), colunas na de fora (ímpares). São 19 fios." },
-    { id: "m1", title: "Placa 1", sub: "M1, 4 × 8, 32 botões", L: ["2","3","4","5"], C: ["6","7","8","9","10","11","12","44"],
-      note: "Linhas e C1 a C7 na barra de cima. A C8 vai no D44, na barra dupla, lado de dentro, na mesma fileira do D45 (C12 do FMS): confira o furo antes de espetar." },
-    { id: "m2", title: "Placa 2", sub: "M2, 4 × 8, 32 botões", L: ["36","38","40","42"], C: ["46","47","48","49","50","51","52","53"],
-      note: "Tudo na barra dupla, logo abaixo do FMS. As colunas ocupam as quatro últimas fileiras, dos dois lados." }
-  ];
+  if (conflitos.length) {
+    var w = document.createElement("div");
+    w.className = "warn";
+    w.textContent = "Erro na pinagem desta página: " + conflitos.join(", ") + ". Confira com o firmware.";
+    svg.parentNode.insertBefore(w, svg);
+    console.error("pinagem", conflitos);
+  }
   var cards = document.getElementById("cards");
   BOARDS.forEach(function (b) {
     function rows(list, k) {
