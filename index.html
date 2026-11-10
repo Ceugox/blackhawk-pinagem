@@ -101,6 +101,7 @@ img { max-width: 100%; }
 .steps pre { margin: 0; font: 600 15px var(--font-mono); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px 12px; overflow-x: auto; }
 .steps .ghost { font-size: 13px; color: var(--muted); }
 svg .pin.hit rect, svg .pin.hit circle:first-of-type { stroke: #ffffff; stroke-width: 3.2; }
+svg .pin.hit { opacity: 1 !important; }
 </style>
 </head>
 <body>
@@ -431,13 +432,13 @@ svg .pin.hit rect, svg .pin.hit circle:first-of-type { stroke: #ffffff; stroke-w
     var fim = k == null ? "" : " SW" + k;
     steps.innerHTML =
       "<ol>" +
-      "<li>Na vez da linha " + L + ", o firmware põe <strong>" + dL + "</strong> em LOW. As outras linhas ficam soltas.</li>" +
+      "<li>Na vez da linha " + L + ", o firmware põe <strong>" + dL + "</strong> em LOW. As outras linhas ficam em INPUT_PULLUP, puxadas para HIGH.</li>" +
       "<li>Todas as colunas são lidas com pull-up interno. Coluna sem botão apertado lê HIGH.</li>" +
       "<li>Com o botão apertado, " + dL + " encosta em <strong>" + dC + "</strong> (coluna " + C + "), que passa a ler LOW.</li>" +
-      "<li>LOW em " + C + " durante a vez de " + L + " só pode ser este botão. Depois de 3 leituras iguais, cerca de 15 ms, o Mega envia:</li>" +
+      "<li>LOW em " + C + " durante a vez de " + L + " indica este botão, se só ele estiver apertado. Depois de 3 leituras iguais, cerca de 15 ms, o Mega envia:</li>" +
       "</ol>" +
       "<pre>P " + pre + L + " " + C + fim + "</pre>" +
-      "<p>Ao soltar, vem a mesma linha com <code>R</code> no lugar do <code>P</code>. A varredura passa pelas " + b.L.length + " linhas a cada 5 ms, então nenhum aperto escapa.</p>" +
+      "<p>Ao soltar, vem a mesma linha com <code>R</code> no lugar do <code>P</code>. A varredura passa pelas " + b.L.length + " linhas a cada 5 ms. Toque com menos de cerca de 15 ms é descartado como ruído do contato.</p>" +
       "<p class=\"ghost\">A placa não tem diodos: apertar três botões que formem três cantos de um retângulo faz o quarto canto parecer apertado. Aperte um botão de cada vez.</p>";
   }
 
