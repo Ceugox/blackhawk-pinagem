@@ -506,9 +506,17 @@ code { font-family: var(--font-mono); font-size: .92em; }
     else if ((m = /^EN(\d)-([AB])$/.exec(s))) p = fd.E[m[1] - 1] && fd.E[m[1] - 1][m[2] === "A" ? 0 : 1];
     return p ? label(p) : null;
   }
+  var ligados = {};
   CONECTORES_FD.forEach(function (c) {
-    c[1].forEach(function (s) { if (!pinoDoSinal(s)) conflitos.push(c[0] + " " + s + " sem pino do Mega"); });
+    c[1].forEach(function (s) { ligados[s] = true; if (!pinoDoSinal(s)) conflitos.push(c[0] + " " + s + " sem pino do Mega"); });
   });
+  // E o contrario: todo pino do Flight Director tem de sair em algum conector ou fio
+  // novo, senao a ficha omite o fio e as teclas dele ficam mudas sem aviso.
+  var precisa = ["GND"];
+  fd.L.forEach(function (p, i) { precisa.push("ROW" + (i + 1)); });
+  fd.C.forEach(function (p, i) { precisa.push("COL" + (i + 1)); });
+  fd.E.forEach(function (par, i) { precisa.push("EN" + (i + 1) + "-A", "EN" + (i + 1) + "-B"); });
+  precisa.forEach(function (s) { if (!ligados[s]) conflitos.push(s + " sem conector nem fio novo"); });
 
   if (conflitos.length) {
     var w = document.createElement("div");
