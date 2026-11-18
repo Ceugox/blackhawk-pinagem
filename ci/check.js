@@ -1,5 +1,5 @@
 // Roda o script da pagina com um DOM minimo. Falha se a pinagem tiver pino
-// repetido, pino de matriz em lugar proibido, pino desenhado sem papel ou
+// repetido, pino de matriz ou de encoder em lugar proibido, pino desenhado sem papel ou
 // pino de BOARDS fora do desenho (o script chama console.error nesses casos).
 // Tambem confere que o detector pega um defeito plantado de proposito.
 const fs = require("fs");
@@ -36,6 +36,10 @@ const plantados = [
   ['"12","44"', '"12","13"', "D13 proibido em matriz", "matriz no D13 do LED"],
   ['"12","44"', '"12","54"', "D54 proibido", "pino que nao existe no Mega"],
   ['"10","9","8"], 236', '"10","9"], 236', "D8 fora do desenho", "pino de BOARDS fora do desenho"],
+  ['["A10","A11"]', '["A9","A11"]', "A9 proibido", "giro de encoder em pino da matriz do Flight Director"],
+  ['["16","17"]', '["16","13"]', "D13 proibido", "giro de encoder no D13 do LED"],
+  ['"A8","A9"]', '"A8","22"]', "D22 proibido", "Flight Director em pino do FMS"],
+  ['["14","15"]', '["14","54"]', "D54 proibido", "giro de encoder em pino que nao existe"],
 ];
 for (const [de, para, esperado, nome] of plantados) {
   if (!m[1].includes(de)) { console.log("defeito plantado nao se aplica: " + nome); process.exit(1); }
