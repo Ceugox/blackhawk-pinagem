@@ -7,9 +7,9 @@ encoders).
 
 Página: https://ceugox.github.io/blackhawk-pinagem/
 
-O firmware é o mesmo em todos os Megas e cada painel tem pinos fixos, então
-qualquer painel pode ir em qualquer Mega. A página deixa marcar qual painel
-está em qual Mega e desenha cada placa só com os fios dela.
+Os quatro painéis ficam no Mega 1 (decisão de 18/11/2026); o Mega 2 fica
+reservado para os próximos componentes, com o mesmo firmware e nenhum fio. O
+Flight Director leva dois fios novos, soldados na placa: ROW4 no A3 e COL1 no A4.
 
 A pinagem vem do `firmware/fms_teclado/fms_teclado.ino` do repo
 Simulador-BlackHawk (privado). Mudou um pino no firmware, mude a lista
@@ -24,5 +24,8 @@ node ci/check.js
 
 Falha se um pino estiver em dois painéis, se uma matriz ou um encoder usar
 pino proibido (serial, D13, energia, SCL/SDA), se um pino for desenhado sem
-papel ou listado em `BOARDS` sem aparecer no desenho. Também planta onze
-defeitos e exige que cada um gere o erro certo.
+papel ou listado em `BOARDS` sem aparecer no desenho. Também planta dezesseis
+defeitos e exige que cada um gere o erro certo. Também falha se um sinal
+de conector do Flight Director não cair num pino do Mega, se um fio do
+Flight Director não sair em nenhum conector ou fio novo, ou se um painel sair
+do Mega 1.
