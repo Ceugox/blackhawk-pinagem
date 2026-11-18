@@ -165,7 +165,7 @@ code { font-family: var(--font-mono); font-size: .92em; }
 
   <section class="card scheme" aria-labelledby="esquema-titulo">
     <h2 id="esquema-titulo">Como uma tecla é lida</h2>
-    <p>Cada tecla fica no cruzamento de uma linha com uma coluna. Escolha o painel e clique numa tecla para ver o caminho do sinal e a linha que o Mega manda pela serial. Os dois pinos usados acendem no desenho do Mega onde o painel está.</p>
+    <p>Cada tecla fica no cruzamento de uma linha com uma coluna. Escolha o painel e clique numa tecla para ver o caminho do sinal e a linha que o Mega manda pela serial. Os dois pinos usados acendem no desenho do Mega 1.</p>
     <div class="tabs" id="tabs-mx" role="group" aria-label="Escolher a matriz">
       <button type="button" data-m="fms" aria-pressed="true">Teclado FMS 7×12</button>
       <button type="button" data-m="m1" aria-pressed="false">Placa 1 4×8</button>
@@ -492,6 +492,24 @@ code { font-family: var(--font-mono); font-size: .92em; }
   BOARDS.forEach(function (b) {
     pinosDe(b).forEach(function (p) { if (!desenhados[p]) conflitos.push(label(p) + " fora do desenho"); });
   });
+
+  // Montagem decidida em 18/11/2026: os quatro paineis no Mega 1, o Mega 2 sem fio.
+  BOARDS.forEach(function (b) { if (ONDE[b.id] !== 0) conflitos.push(NAME[b.id] + " fora do Mega 1"); });
+
+  // Todo sinal dos conectores do Flight Director (e dos fios novos) tem de cair num pino.
+  var fd = BY.fd;
+  function pinoDoSinal(s) {
+    var m, p;
+    if (s === "GND") return "GND";
+    if ((m = /^ROW(\d)$/.exec(s))) p = fd.L[m[1] - 1];
+    else if ((m = /^COL(\d)$/.exec(s))) p = fd.C[m[1] - 1];
+    else if ((m = /^EN(\d)-([AB])$/.exec(s))) p = fd.E[m[1] - 1] && fd.E[m[1] - 1][m[2] === "A" ? 0 : 1];
+    return p ? label(p) : null;
+  }
+  CONECTORES_FD.forEach(function (c) {
+    c[1].forEach(function (s) { if (!pinoDoSinal(s)) conflitos.push(c[0] + " " + s + " sem pino do Mega"); });
+  });
+
   if (conflitos.length) {
     var w = document.createElement("div");
     w.className = "warn";
@@ -501,15 +519,6 @@ code { font-family: var(--font-mono); font-size: .92em; }
   }
 
   // Fichas de fiacao, uma por painel.
-  var fd = BY.fd;
-  function pinoDoSinal(s) {
-    var m;
-    if (s === "GND") return "GND";
-    if ((m = /^ROW(\d)$/.exec(s))) return label(fd.L[m[1] - 1]);
-    if ((m = /^COL(\d)$/.exec(s))) return label(fd.C[m[1] - 1]);
-    if ((m = /^EN(\d)-([AB])$/.exec(s))) return label(fd.E[m[1] - 1][m[2] === "A" ? 0 : 1]);
-    return "?";
-  }
   var cards = document.getElementById("cards");
   BOARDS.forEach(function (b) {
     function rows(list, k) {
@@ -547,7 +556,7 @@ code { font-family: var(--font-mono); font-size: .92em; }
     cards.appendChild(c);
   });
 
-  // Destaque de pinos: sempre no Mega onde o painel esta.
+  // Destaque de pinos: no Mega do painel (hoje sempre o Mega 1, conferido acima).
   var pinosAcesos = [];
   function acenderPinos(boardId, lista) {
     pinosAcesos.forEach(function (e) { e.setAttribute("class", "pin"); });
