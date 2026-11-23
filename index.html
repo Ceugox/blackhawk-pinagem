@@ -417,9 +417,9 @@ td.sig { font: 400 var(--fs-md) var(--font-mono); }
   var BOARDS = [
     { id: "fms", title: "Teclado FMS", sub: "7 linhas × 12 colunas, 79 teclas", L: ["22","24","26","28","30","32","34"], C: ["23","25","27","29","31","33","35","37","39","41","43","45"],
       note: "Tudo na barra dupla: linhas na coluna de dentro (pares), colunas na de fora (ímpares). São 19 fios. Cada tecla aperta o botão na mesma posição da janela FMS-1 do simulador (veja Painéis, aba FMS-1).", chave: CHAVE_FMS },
-    { id: "m1", title: "M1", sub: "placa de 32 botões, 4 × 8", L: ["2","3","4","5"], C: ["6","7","8","9","10","11","12","44"],
+    { id: "m1", title: "M1", sub: "moldura do MFD-1 (placa PTT_PFD), 4 × 8", L: ["2","3","4","5"], C: ["6","7","8","9","10","11","12","44"],
       note: "Linhas e C1 a C7 na barra de cima. A C8 vai no D44, na barra dupla, lado de dentro, na mesma fileira do D45 (C12 do FMS): confira o furo antes de espetar." },
-    { id: "m2", title: "M2", sub: "placa de 32 botões, 4 × 8 (não é o Mega 2)", L: ["36","38","40","42"], C: ["46","47","48","49","50","51","52","53"],
+    { id: "m2", title: "M2", sub: "moldura do MFD-2 (placa PTT_PFD), 4 × 8 (não é o Mega 2)", L: ["36","38","40","42"], C: ["46","47","48","49","50","51","52","53"],
       note: "Tudo na barra dupla, logo abaixo do FMS. As colunas ocupam as quatro últimas fileiras, dos dois lados." },
     { id: "fd", title: "Flight Director", sub: "FD, 4 × 6, 13 teclas, eixo dos 9 encoders e giro de EN1 a EN5", L: ["A0","A1","A2","A3"], C: ["A4","A5","A6","A7","A8","A9"],
       E: [["A10","A11"],["A12","A13"],["A14","A15"],["14","15"],["16","17"]],
@@ -778,6 +778,45 @@ td.sig { font: 400 var(--fs-md) var(--font-mono); }
     { nome: "HDG P-SYNC", x: 973, y: 224, w: 85, h: 85, chave: "EN5", giro: ["EN5"], alvo: "_hdgKnob" }
   ];
 
+  // MFD-1/MFD-2: canto x, y, largura e altura de cada botao da moldura na janela
+  // MfdWindow com faceplate (931x705, visor em 122,95 de 687x515; UI Automation,
+  // 23/11/2026). "pos" e a posicao "Ln Cn" na placa PTT_PFD (M1 = MFD-1, M2 = MFD-2),
+  // tirada do esquematico SCH_PTT_PFD: as 6 teclas do meio de cada lado sao os
+  // Bezel1-6, as pontas sao Power e os balancins (decisao de 23/11); L1 C1 sem funcao.
+  var LAYOUT_MFD = [
+    { nome: "cima 1", id: "TopBezel1", x: 197, y: 11, w: 36, h: 28, pos: "L2 C1" },
+    { nome: "cima 2", id: "TopBezel2", x: 273, y: 11, w: 36, h: 28, pos: "L3 C1" },
+    { nome: "cima 3", id: "TopBezel3", x: 350, y: 11, w: 36, h: 28, pos: "L4 C1" },
+    { nome: "cima 4", id: "TopBezel4", x: 534, y: 11, w: 36, h: 28, pos: "L1 C8" },
+    { nome: "cima 5", id: "TopBezel5", x: 611, y: 11, w: 36, h: 28, pos: "L2 C8" },
+    { nome: "cima 6", id: "TopBezel6", x: 687, y: 11, w: 36, h: 28, pos: "L3 C8" },
+    { nome: "esquerda 1", id: "LeftBezel1", x: 40, y: 183, w: 28, h: 36, pos: "L2 C2" },
+    { nome: "esquerda 2", id: "LeftBezel2", x: 40, y: 250, w: 28, h: 36, pos: "L3 C2" },
+    { nome: "esquerda 3", id: "LeftBezel3", x: 40, y: 317, w: 28, h: 36, pos: "L4 C2" },
+    { nome: "esquerda 4", id: "LeftBezel4", x: 40, y: 384, w: 28, h: 36, pos: "L4 C3" },
+    { nome: "esquerda 5", id: "LeftBezel5", x: 40, y: 451, w: 28, h: 36, pos: "L3 C3" },
+    { nome: "esquerda 6", id: "LeftBezel6", x: 40, y: 518, w: 28, h: 36, pos: "L2 C3" },
+    { nome: "direita 1", id: "RightBezel1", x: 863, y: 183, w: 28, h: 36, pos: "L2 C7" },
+    { nome: "direita 2", id: "RightBezel2", x: 863, y: 250, w: 28, h: 36, pos: "L3 C7" },
+    { nome: "direita 3", id: "RightBezel3", x: 863, y: 317, w: 28, h: 36, pos: "L4 C7" },
+    { nome: "direita 4", id: "RightBezel4", x: 863, y: 384, w: 28, h: 36, pos: "L1 C6" },
+    { nome: "direita 5", id: "RightBezel5", x: 863, y: 451, w: 28, h: 36, pos: "L2 C6" },
+    { nome: "direita 6", id: "RightBezel6", x: 863, y: 518, w: 28, h: 36, pos: "L3 C6" },
+    { nome: "baixo 1", id: "BottomBezel1", x: 132, y: 666, w: 36, h: 28, pos: "L2 C4" },
+    { nome: "baixo 2", id: "BottomBezel2", x: 192, y: 666, w: 36, h: 28, pos: "L3 C4" },
+    { nome: "baixo 3", id: "BottomBezel3", x: 252, y: 666, w: 36, h: 28, pos: "L4 C4" },
+    { nome: "baixo 4", id: "BottomBezel4", x: 632, y: 666, w: 36, h: 28, pos: "L1 C5" },
+    { nome: "baixo 5", id: "BottomBezel5", x: 691, y: 666, w: 36, h: 28, pos: "L2 C5" },
+    { nome: "baixo 6", id: "BottomBezel6", x: 750, y: 666, w: 36, h: 28, pos: "L3 C5" },
+    { nome: "Power", id: "Power", x: 47, y: 92, w: 20, h: 57, pos: "L1 C2" },
+    { nome: "Backlight ▲", id: "BacklightBrightnessUp", x: 48, y: 599, w: 20, h: 17, pos: "L1 C3" },
+    { nome: "Backlight ▼", id: "BacklightBrightnessDown", x: 48, y: 616, w: 20, h: 17, pos: "L1 C4" },
+    { nome: "Video Brightness ▲", id: "VideoBrightnessUp", x: 863, y: 106, w: 20, h: 17, pos: "L4 C8" },
+    { nome: "Video Brightness ▼", id: "VideoBrightnessDown", x: 863, y: 123, w: 20, h: 16, pos: "L1 C7" },
+    { nome: "Video Contrast ▲", id: "VideoContrastUp", x: 863, y: 599, w: 20, h: 17, pos: "L4 C6" },
+    { nome: "Video Contrast ▼", id: "VideoContrastDown", x: 863, y: 616, w: 20, h: 17, pos: "L4 C5" }
+  ];
+
   // Onde esta cada coisa: posicao na matriz pela chave, e fios do giro pelo nome do encoder.
   function posNaMatriz(tabela, chave) {
     for (var i = 0; i < tabela.length; i++) for (var j = 0; j < tabela[i].length; j++) if (tabela[i][j] === chave) return [i, j];
@@ -817,6 +856,15 @@ td.sig { font: 400 var(--fs-md) var(--font-mono); }
     });
     CHAVE_FD.forEach(function (l) { l.forEach(function (k) { if (k !== -1 && !chavesFd[k]) conflitos.push("Painel FDDCP-1 sem a tecla " + (typeof k === "number" ? "SW" + k : k)); }); });
     ["fd", "fd2"].forEach(function (id) { BY[id].EN.forEach(function (en) { if (!girosFd[en]) conflitos.push("Painel FDDCP-1 sem o giro " + en); }); });
+    // MFD: cada botao numa posicao da placa 4 x 8, sem repetir; so L1 C1 sobra.
+    var posMfd = {}, idsMfd = {};
+    LAYOUT_MFD.forEach(function (b) {
+      if (!/^L[1-4] C[1-8]$/.test(b.pos)) conflitos.push("Painel MFD: " + b.nome + " fora da placa 4 × 8 (" + b.pos + ")");
+      if (posMfd[b.pos]) conflitos.push("Painel MFD: " + b.pos + " em dois botões");
+      if (idsMfd[b.id]) conflitos.push("Painel MFD: " + b.id + " desenhado duas vezes");
+      posMfd[b.pos] = true; idsMfd[b.id] = true;
+    });
+    if (LAYOUT_MFD.length !== 31 || posMfd["L1 C1"]) conflitos.push("Painel MFD com " + LAYOUT_MFD.length + " botões, esperado 31 e L1 C1 sem função");
   })();
 
   if (conflitos.length) {
@@ -1154,20 +1202,28 @@ td.sig { font: 400 var(--fs-md) var(--font-mono); }
     });
   }
 
-  function desenharPlaca(id) {
-    var b = BY[id], cel = 70;
-    pn.setAttribute("viewBox", "0 0 " + (b.C.length * cel + 40) + " " + (b.L.length * cel + 40));
-    pnEl("rect", { x: 4, y: 4, width: b.C.length * cel + 32, height: b.L.length * cel + 32, rx: 14, fill: "#3a3f45", stroke: "#1c1f23", "stroke-width": 3 });
-    for (var i = 0; i < b.L.length; i++) for (var j = 0; j < b.C.length; j++) (function (i, j) {
-      var x = 20 + j * cel, y = 20 + i * cel, nome = "L" + (i + 1) + " C" + (j + 1);
-      botao("rect", { x: x + 6, y: y + 6, width: cel - 12, height: cel - 12, rx: 8, fill: "#1f2328", stroke: "#8b96a3", "stroke-width": 1.4 },
-        nome, x + cel / 2, y + cel / 2 + 5, 14, function (g) {
-          mostrar(b.title + ", botão " + nome, [blocoTecla("Apertar", b, i, j, null, null)], g);
-        });
-    })(i, j);
+  function desenharMfd(id) {
+    var b = BY[id], janela = id === "m1" ? "MFD-1" : "MFD-2";
+    pn.setAttribute("viewBox", "0 0 931 705");
+    pnEl("rect", { x: 2, y: 2, width: 927, height: 701, rx: 18, fill: "#3a3f45", stroke: "#1c1f23", "stroke-width": 3 });
+    pnEl("rect", { x: 122, y: 95, width: 687, height: 515, rx: 6, fill: "#0b0f0c", stroke: "#1c1f23" });
+    pnEl("text", { x: 465, y: 360, "text-anchor": "middle", fill: "#3f8f4f", "font-family": "IBM Plex Mono, monospace", "font-size": 26 }, null, "visor do " + janela);
+    LAYOUT_MFD.forEach(function (t) {
+      var m = /^L([1-4]) C([1-8])$/.exec(t.pos); if (!m) return;  // ja acusado nos conflitos
+      var i = +m[1] - 1, j = +m[2] - 1;
+      var lado = t.x < 100 ? 1 : t.x > 800 ? -1 : 0, cx = t.x + t.w / 2, cy = t.y + t.h / 2;
+      // Rotulo curto ao lado do botao, para dentro (lados), abaixo (cima) ou acima (baixo).
+      var curto = t.nome.replace("esquerda ", "E").replace("direita ", "D").replace("cima ", "C").replace("baixo ", "B")
+        .replace("Backlight ", "BL").replace("Video Brightness ", "VB").replace("Video Contrast ", "VC").replace("Power", "PWR");
+      var tx = lado === 1 ? cx + 46 : lado === -1 ? cx - 46 : cx, ty = lado ? cy + 7 : t.y < 100 ? t.y + 60 : t.y - 14;
+      botao("rect", { x: t.x - 4, y: t.y - 4, width: t.w + 8, height: t.h + 8, rx: 5, fill: "#1f2328", stroke: "#8b96a3", "stroke-width": 1.6 },
+        curto, tx, ty, 20, function (g) {
+          mostrar(janela + ", " + t.nome, [blocoTecla("Apertar", b, i, j, null, "botão " + t.nome + " da moldura do " + janela + " (" + t.id + ")")], g);
+        }, t.nome);
+    });
   }
 
-  var PAINEIS = [["fms1", "FMS-1", desenharFms1], ["fddcp", "FDDCP-1", desenharFddcp], ["m1", "M1", function () { desenharPlaca("m1"); }], ["m2", "M2", function () { desenharPlaca("m2"); }]];
+  var PAINEIS = [["fms1", "FMS-1", desenharFms1], ["fddcp", "FDDCP-1", desenharFddcp], ["m1", "MFD-1", function () { desenharMfd("m1"); }], ["m2", "MFD-2", function () { desenharMfd("m2"); }]];
   var pnBotoes = [];
   function escolherPainel(n) {
     while (pn.firstChild) pn.removeChild(pn.firstChild);

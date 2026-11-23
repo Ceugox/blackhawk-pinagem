@@ -77,8 +77,8 @@ for (const aba of real.abasMx.slice(1)) {
   if (aba.getAttribute("data-m") === "fd" && !novos.includes("EN8")) { console.log("aba fd sem os eixos de encoder"); process.exit(1); }
 }
 // Paineis: as 4 abas, e cada botao de cada painel mostra a combinacao certa.
-const abasPn = real.cliques.filter((c) => ["FMS-1", "FDDCP-1", "M1", "M2"].includes(c.no.textContent) && c.no.type === "button");
-const esperadoPn = { "FMS-1": 79, "FDDCP-1": 22, "M1": 32, "M2": 32 };
+const abasPn = real.cliques.filter((c) => ["FMS-1", "FDDCP-1", "MFD-1", "MFD-2"].includes(c.no.textContent) && c.no.type === "button");
+const esperadoPn = { "FMS-1": 79, "FDDCP-1": 22, "MFD-1": 31, "MFD-2": 31 };
 if (abasPn.length !== 4) { console.log("abas de painel: " + abasPn.length + ", esperado 4"); process.exit(1); }
 for (const aba of abasPn) {
   const nome = aba.no.textContent, antesC = real.cliques.length;
@@ -126,7 +126,9 @@ const casos = [
   ["FDDCP-1", "HDG P-SYNC", ["<pre>G FD EN5 +</pre>", "<dd>D16</dd>", "<dd>D17</dd>", "<pre>P FD L4 C5 EN5</pre>"]],
   ["FMS-1", "A", ["<pre>P L1 C6 SW39</pre>", "<dd>L1 no D22</dd>", "<dd>C6 no D33</dd>"]],
   ["FMS-1", "ENT", ["<pre>P L7 C11 SW66</pre>"]],
-  ["M2", "L4 C8", ["<pre>P M2 L4 C8</pre>", "<dd>C8 no D53</dd>"]],
+  ["MFD-2", "Video Brightness ▲", ["<pre>P M2 L4 C8</pre>", "<dd>C8 no D53</dd>", "VideoBrightnessUp"]],
+  ["MFD-1", "esquerda 1", ["<pre>P M1 L2 C2</pre>", "<dd>L2 no D3</dd>", "<dd>C2 no D7</dd>", "LeftBezel1", "MFD-1"]],
+  ["MFD-1", "baixo 2", ["<pre>P M1 L3 C4</pre>", "BottomBezel2"]],
 ];
 for (const [painel, rotulo, trechos] of casos) {
   const info = infoDe(painel, rotulo);
@@ -175,6 +177,9 @@ const plantados = [
   ['giro: ["EN8", "EN8M"]', 'giro: ["EN8", "EN7M"]', "giro EN7M de NAV SRC / OBS sem fios", "giro do painel sem fio"],
   ['{ nome: "DECL", x: 387, y: 207, w: 119, h: 114, chave: 37 },', '', "Painel FDDCP-1 sem a tecla SW37", "tecla do FD fora do painel"],
   ['giro: ["EN3"], alvo', 'giro: [], alvo', "Painel FDDCP-1 sem o giro EN3", "giro do FD fora do painel"],
+  ['id: "TopBezel2", x: 273, y: 11, w: 36, h: 28, pos: "L3 C1"', 'id: "TopBezel2", x: 273, y: 11, w: 36, h: 28, pos: "L2 C1"', "Painel MFD: L2 C1 em dois botões", "duas teclas do MFD na mesma posicao"],
+  ['pos: "L4 C5" }', 'pos: "L1 C1" }', "L1 C1 sem função", "canto sem funcao ganhou botao"],
+  ['pos: "L4 C5" }', 'pos: "L5 C5" }', "fora da placa 4 × 8", "MFD em linha que nao existe"],
   ['chave: "EN7", giro: ["EN7"]', 'chave: "EN7", giro: ["EN6"]', "giro de REF SEL não é do encoder EN7", "giro trocado entre giratorios"],
   ['giro: ["EN8", "EN8M"]', 'giro: ["EN8M", "EN8"]', "giro de NAV SRC / OBS não é do encoder EN8", "anel e miolo invertidos"],
   ['chave: 50 }', 'chave: 51 }', "HVR sem posição na matriz do FD", "estação com SW que não existe"],
