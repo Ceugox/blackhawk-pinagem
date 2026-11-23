@@ -563,7 +563,15 @@ code { font-family: var(--font-mono); font-size: .92em; }
 
   // FMS1 tem de ter a forma da CHAVE_FMS (7 x 12), um nome em cada posicao com
   // tecla e nenhum nas vazias, sem repetir. A volta e pela CHAVE_FMS, a fonte.
-  var nomesFms = {};
+  var nomesFms = {}, swVistos = {};
+  // A propria CHAVE_FMS: 7 x 12, as 79 teclas SW0..SW78 uma vez cada.
+  if (CHAVE_FMS.length !== 7) conflitos.push("CHAVE_FMS com " + CHAVE_FMS.length + " fileiras, esperado 7");
+  CHAVE_FMS.forEach(function (l, i) {
+    if (l.length !== 12) conflitos.push("CHAVE_FMS fileira " + (i + 1) + " com " + l.length + " colunas, esperado 12");
+    l.forEach(function (sw) { if (sw !== -1) { if (swVistos[sw]) conflitos.push("SW" + sw + " repetida no FMS"); swVistos[sw] = true; } });
+  });
+  for (var s = 0; s <= 78; s++) if (!swVistos[s]) conflitos.push("SW" + s + " sem posição no FMS");
+  if (Object.keys(swVistos).length !== 79) conflitos.push("FMS com " + Object.keys(swVistos).length + " teclas, esperado 79");
   if (FMS1.length !== CHAVE_FMS.length) conflitos.push("FMS1 com " + FMS1.length + " fileiras, esperado " + CHAVE_FMS.length);
   CHAVE_FMS.forEach(function (linhaSw, i) {
     var linha = FMS1[i] || [];
@@ -688,7 +696,7 @@ code { font-family: var(--font-mono); font-size: .92em; }
           var eixo = typeof k === "string";
           var g = mxEl("g", { "class": "mx-btn", tabindex: 0, role: "button", "aria-label": (eixo ? "Eixo do encoder " + k : "Tecla") + " L" + (i + 1) + " C" + (j + 1) });
           var r = mxEl("rect", { x: x - 13, y: y - 13, width: 26, height: 26, rx: eixo ? 13 : 5, fill: "var(--surface)", stroke: "var(--muted)", "stroke-width": 1.2 }, g);
-          var nomeFms = id === "fms" ? FMS1[i][j] : null;  // no FMS, o nome do botao da janela FMS-1
+          var nomeFms = id === "fms" && FMS1[i] ? FMS1[i][j] : null;  // no FMS, o nome do botao da janela FMS-1
           var texto = nomeFms != null ? nomeFms : k != null ? String(k) : "";
           mxEl("text", { x: x, y: y + 3.5, "text-anchor": "middle", fill: "var(--fg)", "font-family": mono, "font-size": eixo || texto.length > 3 ? 8.5 : 9.5, "font-weight": 600 }, g, texto);
           if (nomeFms != null) mxEl("title", {}, g, nomeFms + " = SW" + k + ", L" + (i + 1) + " C" + (j + 1));

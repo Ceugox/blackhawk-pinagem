@@ -1,7 +1,10 @@
 // Roda o script da pagina com um DOM minimo. Falha se a pinagem tiver pino
 // repetido dentro do mesmo Mega, pino de matriz ou de encoder em lugar proibido,
 // painel fora do Mega decidido, pino desenhado sem papel ou
-// pino de BOARDS fora do desenho (o script chama console.error nesses casos).
+// pino de BOARDS fora do desenho, CHAVE_FMS fora de 7 x 12 ou sem as 79 teclas
+// SW0..SW78 uma vez cada, FMS1 (nomes da FMS-1) fora da forma da CHAVE_FMS (o
+// script chama console.error nesses casos). Depois confere a pagina desenhada:
+// nomes da FMS-1 nas teclas, passo a passo, abas de matriz e de encoder.
 // Tambem confere que o detector pega um defeito plantado de proposito.
 const fs = require("fs");
 const html = fs.readFileSync(__dirname + "/../index.html", "utf8");
@@ -105,6 +108,8 @@ const plantados = [
   ['"W", null, "SK8"', '"W", "Z", "SK8"', "FMS L4 C11: nome e SW não batem", "botao do FMS-1 em posicao sem tecla"],
   ['"G", "H", "I"', '"G", "G", "I"', "FMS-1 G repetido", "botao do FMS-1 repetido"],
   ['"W", null, "SK8"]', '"W", null]', "FMS1 fileira 4 com 11 nomes", "fileira do FMS-1 curta"],
+  ['65, 71, 77]', '65, 71, -1]', "SW77 sem posição no FMS", "tecla do FMS some da CHAVE_FMS"],
+  ['[ 1, 10, 17', '[ 0, 10, 17', "SW0 repetida no FMS", "SW repetida na CHAVE_FMS"],
   ['["ROW4","COL1"]', '["COL1"]', "ROW4 sem conector nem fio novo", "fio do Flight Director fora dos conectores"],
   ['["GND","ROW3"', '["ROW3"', "GND sem conector nem fio novo", "GND dos encoders fora dos conectores"],
 ];
