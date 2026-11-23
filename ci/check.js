@@ -1,5 +1,6 @@
 // Roda o script da pagina com um DOM minimo. Falha se a pinagem tiver pino
-// repetido, pino de matriz ou de encoder em lugar proibido, pino desenhado sem papel ou
+// repetido dentro do mesmo Mega, pino de matriz ou de encoder em lugar proibido,
+// painel fora do Mega decidido, pino desenhado sem papel ou
 // pino de BOARDS fora do desenho (o script chama console.error nesses casos).
 // Tambem confere que o detector pega um defeito plantado de proposito.
 const fs = require("fs");
@@ -41,8 +42,13 @@ const plantados = [
   ['"A8","A9"]', '"A8","22"]', "D22 proibido", "Flight Director em pino do FMS"],
   ['["14","15"]', '["14","54"]', "D54 proibido", "giro de encoder em pino que nao existe"],
   ['["ROW4","COL1"]', '["ROW4","COL7"]', "Fio novo COL7 sem pino do Mega", "sinal de conector sem pino (coluna que nao existe)"],
-  ['["EN4-A","EN4-B","COL6","COL5"]', '["EN9-A","EN4-B","COL6","COL5"]', "H4 EN9-A sem pino do Mega", "sinal de encoder sem giro ligado"],
-  ['fd: 0 }', 'fd: 1 }', "FD fora do Mega 1", "painel fora do Mega 1"],
+  ['["EN4-A","EN4-B","COL6","COL5"]', '["EN7M-A","EN4-B","COL6","COL5"]', "H4 EN7M-A sem pino do Mega", "sinal de encoder sem giro ligado"],
+  ['var ONDE = { fms: 0, m1: 0, m2: 0, fd: 0,', 'var ONDE = { fms: 0, m1: 0, m2: 0, fd: 1,', "Flight Director fora do Mega 1", "painel fora do Mega 1"],
+  ['var ONDE = { fms: 0, m1: 0, m2: 0, fd: 0, fd2: 1 }', 'var ONDE = { fms: 0, m1: 0, m2: 0, fd: 0, fd2: 0 }', "fora do Mega 2", "giro de EN6-EN9 fora do Mega 2"],
+  ['["32","33"]', '["32","31"]', "D31 proibido no Mega 2", "pino repetido dentro do Mega 2"],
+  ['["22","23"]', '["22","1"]', "D1 proibido no Mega 2", "giro do Mega 2 na serial do USB"],
+  ['"EN9M-B","GND2"]', '"EN9M-B"]', "GND2 sem conector nem fio novo", "GND do Mega 2 fora da ficha"],
+  ['"EN8M-A","EN8M-B",', '', "EN8M-A sem conector nem fio novo", "miolo do duplo fora da ficha"],
   ['["ROW4","COL1"]', '["COL1"]', "ROW4 sem conector nem fio novo", "fio do Flight Director fora dos conectores"],
   ['["GND","ROW3"', '["ROW3"', "GND sem conector nem fio novo", "GND dos encoders fora dos conectores"],
 ];

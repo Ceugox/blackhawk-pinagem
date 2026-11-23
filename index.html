@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
-/* Layout: o que ha de novo, Mega 1 com tudo e Mega 2 reservado desenhados em escala,
+/* Layout: o que ha de novo, Mega 1 com os quatro paineis e Mega 2 com o giro de EN6-EN9 em escala,
    como tecla e giro sao lidos, e uma ficha de fiacao por painel. */
 :root {
   --bg: #eef2f6;
@@ -126,14 +126,14 @@ code { font-family: var(--font-mono); font-size: .92em; }
 <div class="wrap">
   <header>
     <h1>Pinagem dos Megas do BlackHawk</h1>
-    <p>Dois Arduino Mega 2560 ligados ao computador, cada um por um cabo USB. O <strong>Mega 1</strong> tem os quatro painéis: teclado FMS, duas placas de 32 botões e o Flight Director. O <strong>Mega 2</strong> fica reservado para os próximos componentes. Vale para o firmware <span class="fw">FMS pronto v7</span>.</p>
+    <p>Dois Arduino Mega 2560 ligados ao computador, cada um por um cabo USB. O <strong>Mega 1</strong> tem os quatro painéis: teclado FMS, duas placas de 32 botões e o Flight Director. O <strong>Mega 2</strong> tem o giro de EN6 a EN9 do Flight Director, que não coube no Mega 1, e espaço para os próximos componentes. Cada Mega tem o seu firmware: <span class="fw">Mega 1 pronto v8</span> e <span class="fw">Mega 2 pronto v1</span>.</p>
   </header>
 
   <div class="rules">
-    <div class="rule"><strong>Tudo no Mega 1</strong><span>Os quatro painéis vão na mesma placa. Marque essa placa com uma etiqueta "Mega 1".</span></div>
-    <div class="rule"><strong>O Mega 2 está reservado</strong><span>Fica no USB com o mesmo firmware e nenhum fio. Não ligue nada nele até o firmware dos próximos componentes.</span></div>
+    <div class="rule"><strong>Um firmware por Mega</strong><span>O Mega 1 grava o <code>fms_teclado</code>, o Mega 2 grava o <code>mega2</code>. Marque cada placa com a etiqueta "Mega 1" ou "Mega 2".</span></div>
+    <div class="rule"><strong>O mesmo pino, papéis diferentes</strong><span>O D22 do Mega 1 é do FMS; o D22 do Mega 2 é do EN6. Confira em qual Mega está o fio.</span></div>
     <div class="rule"><strong>A ordem dos fios é fixa</strong><span>Dentro do painel, cada fio tem o seu pino. Trocar dois fios troca o nome das teclas.</span></div>
-    <div class="rule"><strong>O Painel lê todos juntos</strong><span>Ele acha sozinho cada Mega ligado, em qualquer entrada USB.</span></div>
+    <div class="rule"><strong>O Painel lê todos juntos</strong><span>Ele acha sozinho cada Mega ligado, em qualquer entrada USB, e sabe qual é qual pela mensagem que cada um manda ao ligar.</span></div>
   </div>
 
   <div class="filters" role="group" aria-label="Destacar um painel">
@@ -151,14 +151,13 @@ code { font-family: var(--font-mono); font-size: .92em; }
 
   <section class="board" aria-labelledby="mega-h-1">
     <h2 class="mega-h" id="mega-h-1">Mega 2</h2>
-    <svg id="mega-1" viewBox="0 0 1010 570" role="img" aria-label="Desenho do segundo Arduino Mega 2560, reservado para os próximos componentes, sem nenhum fio"></svg>
+    <svg id="mega-1" viewBox="0 0 1010 570" role="img" aria-label="Desenho do segundo Arduino Mega 2560, com o giro dos encoders EN6 a EN9 do Flight Director"></svg>
   </section>
 
   <div class="legend">
     <span><svg width="12" height="12"><rect x="1" y="1" width="10" height="10" fill="var(--off)"/></svg> linha (L)</span>
     <span><svg width="12" height="12"><circle cx="6" cy="6" r="5" fill="var(--off)"/></svg> coluna (C)</span>
     <span><svg width="12" height="12"><polygon points="6,0.5 11.5,6 6,11.5 0.5,6" fill="var(--off)"/></svg> giro de encoder (fios A e B)</span>
-    <span><svg width="12" height="12"><rect x="1.5" y="1.5" width="9" height="9" fill="none" stroke="var(--off)" stroke-width="1.5" stroke-dasharray="2 2"/></svg> Mega 2: reservado, sem fio (o v7 ainda lê este pino como o painel do Mega 1)</span>
     <span><svg width="12" height="12"><rect x="1.5" y="1.5" width="9" height="9" fill="var(--header)" stroke="var(--fg)" stroke-width="1.5"/></svg> livre</span>
     <span><svg width="12" height="12"><rect x="1" y="1" width="10" height="10" fill="var(--header)" stroke="var(--off)"/></svg> não usar (serial do USB, energia, SCL/SDA repetidos)</span>
   </div>
@@ -180,7 +179,7 @@ code { font-family: var(--font-mono); font-size: .92em; }
 
   <section class="card scheme" aria-labelledby="giro-titulo">
     <h2 id="giro-titulo">Como um giro é lido</h2>
-    <p>O encoder do Flight Director é um botão que gira sem fim, aos cliques, e também aperta. O aperto do eixo entra na matriz, como uma tecla. O giro vai por dois fios próprios, A e B, mais o comum no GND. Escolha o encoder para ver os pinos dele.</p>
+    <p>O encoder do Flight Director é um botão que gira sem fim, aos cliques, e também aperta. O aperto do eixo entra na matriz, como uma tecla. O giro vai por dois fios próprios, A e B, mais o comum no GND. EN1 a EN5 estão no Mega 1; EN6 a EN9 no Mega 2. EN8 e EN9 são duplos: o miolo (EN8M, EN9M) é um encoder à parte. Escolha o encoder para ver os pinos dele.</p>
     <div class="tabs" id="tabs-en" role="group" aria-label="Escolher o encoder"></div>
     <div class="scheme-grid">
       <div class="mx-wrap">
@@ -213,20 +212,20 @@ code { font-family: var(--font-mono); font-size: .92em; }
   <div class="notes">
     <div class="card">
       <h2>Dois Megas</h2>
-      <p>Cada Mega tem o seu cabo USB e aparece no Windows como uma porta COM. O número da porta muda conforme a entrada USB usada, não conforme a placa: por isso o Mega 1 é reconhecido pela etiqueta, não pela COM. Para o Painel tanto faz: ele abre todas as portas que respondem <code>FMS pronto</code> e junta as linhas. Os Megas não são ligados um no outro.</p>
-      <p>O Mega 2 roda o mesmo v7 e não manda nada porque não tem fio. Um componente ligado nele hoje seria lido como tecla do FMS, das placas ou do Flight Director: os próximos componentes vêm com firmware próprio.</p>
+      <p>Cada Mega tem o seu cabo USB e aparece no Windows como uma porta COM. O número da porta muda conforme a entrada USB usada, não conforme a placa. Quem diz qual é qual é a mensagem que o Mega manda ao ligar, <code>Mega 1 pronto v8</code> ou <code>Mega 2 pronto v1</code>: o Painel procura da COM menor para a maior, mas é a mensagem que vale. Os Megas não são ligados um no outro.</p>
+      <p>Grave um Mega por vez, com só ele no USB. Se o firmware do Mega 1 for gravado nos dois, o Painel avisa "Mega 1 em duas COMs" e usa só um deles.</p>
     </div>
     <div class="card">
       <h2>Livres</h2>
-      <p><code>D13</code> e <code>D18</code> a <code>D21</code>. Os furos SCL e SDA da barra de cima são os mesmos pinos D21 e D20, repetidos. No desenho eles aparecem como "não usar" para o mesmo sinal não ser ligado duas vezes. O D13 fica livre de propósito: ele tem o LED da placa, que puxa o pino para baixo e faria uma coluna inteira parecer apertada.</p>
+      <p>No Mega 1, <code>D13</code> e <code>D18</code> a <code>D21</code>. No Mega 2, tudo menos o <code>D22</code> ao <code>D33</code>. Os furos SCL e SDA da barra de cima são os mesmos pinos D21 e D20, repetidos. No desenho eles aparecem como "não usar" para o mesmo sinal não ser ligado duas vezes. O D13 fica livre de propósito: ele tem o LED da placa, que puxa o pino para baixo e faria uma coluna inteira parecer apertada.</p>
     </div>
     <div class="card">
       <h2>Não usar</h2>
-      <p><code>D0</code> e <code>D1</code> são a serial do USB, que o Painel usa. Nenhum fio vai em 5V, 3.3V ou VIN. No GND vai um único fio: o GND do conector H1 do Flight Director, que é o comum dos encoders. Nenhum fio de linha ou de coluna vai em GND.</p>
+      <p><code>D0</code> e <code>D1</code> são a serial do USB, que o Painel usa. Nenhum fio vai em 5V, 3.3V ou VIN. No GND de cada Mega vai um único fio: no Mega 1, o GND do conector H1 do Flight Director; no Mega 2, o GND soldado na placa. É o comum dos encoders. Nenhum fio de linha ou de coluna vai em GND.</p>
     </div>
     <div class="card">
       <h2>Teste sem placa</h2>
-      <p>Jumper <code>D22–D23</code> dá <code>P L1 C1 SW0</code>, <code>D2–D6</code> dá <code>P M1 L1 C1</code>, <code>D5–D44</code> dá <code>P M1 L4 C8</code>, <code>D36–D46</code> dá <code>P M2 L1 C1</code> e <code>A0–A4</code> dá <code>P FD L1 C1 EN8</code>. Encoder solto: A no <code>A10</code>, o terminal do meio num <code>GND</code>, B no <code>A11</code>; girar dá <code>G FD EN1 +</code> ou <code>-</code>. Nenhum pino vai a HIGH, então trocar dois fios entre si não queima nada. Mas nenhum fio pode encostar no 5V, 3.3V ou VIN: um pino em LOW ligado ao 5V entra em curto e pode danificar o Mega. O 5V fica na fileira logo acima do D22 e do D23.</p>
+      <p>Jumper <code>D22–D23</code> dá <code>P L1 C1 SW0</code>, <code>D2–D6</code> dá <code>P M1 L1 C1</code>, <code>D5–D44</code> dá <code>P M1 L4 C8</code>, <code>D36–D46</code> dá <code>P M2 L1 C1</code> e <code>A0–A4</code> dá <code>P FD L1 C1 EN8</code>. Encoder solto: A no <code>A10</code>, o terminal do meio num <code>GND</code>, B no <code>A11</code>; girar dá <code>G FD EN1 +</code> ou <code>-</code>. No Mega 2, o mesmo encoder com A no <code>D22</code> e B no <code>D23</code> dá <code>G FD EN6 +</code>. Nenhum pino vai a HIGH, então trocar dois fios entre si não queima nada. Mas nenhum fio pode encostar no 5V, 3.3V ou VIN: um pino em LOW ligado ao 5V entra em curto e pode danificar o Mega. O 5V fica na fileira logo acima do D22 e do D23.</p>
     </div>
     <div class="card">
       <h2>O giro se ajusta olhando o valor</h2>
@@ -239,8 +238,11 @@ code { font-family: var(--font-mono); font-size: .92em; }
 (function () {
   var NS = "http://www.w3.org/2000/svg";
 
-  // Pinagem do firmware v7 (firmware/fms_teclado/fms_teclado.ino do Simulador-BlackHawk).
-  // Fonte unica: os desenhos e as fichas saem daqui.
+  // Pinagem dos firmwares "Mega 1 pronto v8" (firmware/fms_teclado/fms_teclado.ino) e
+  // "Mega 2 pronto v1" (firmware/mega2/mega2.ino) do Simulador-BlackHawk.
+  // Fonte unica: os desenhos e as fichas saem daqui. Cada Mega tem o seu firmware
+  // (decisao de 23/11/2026), entao o mesmo numero de pino pode ter papeis diferentes
+  // em cada Mega; dentro de um Mega, um pino so tem um papel.
   // Chave do esquematico em cada posicao do FMS (CHAVE_FMS do firmware); -1 = sem tecla.
   var CHAVE_FMS = [
     [ 0, 11, 18, 25, 32, 39, 44, 51, 58, 65, 71, 77],
@@ -267,53 +269,74 @@ code { font-family: var(--font-mono); font-size: .92em; }
       note: "Tudo na barra dupla, logo abaixo do FMS. As colunas ocupam as quatro últimas fileiras, dos dois lados." },
     { id: "fd", title: "Flight Director", sub: "FD, 4 × 6, 13 teclas e 9 encoders", L: ["A0","A1","A2","A3"], C: ["A4","A5","A6","A7","A8","A9"],
       E: [["A10","A11"],["A12","A13"],["A14","A15"],["14","15"],["16","17"]],
-      note: "Matriz e os encoders EN1 a EN3 na barra dos analógicos, embaixo. EN4 e EN5 na barra de cima, à direita. São 20 fios de sinal e o GND.", chave: CHAVE_FD }
+      EN: ["EN1","EN2","EN3","EN4","EN5"],
+      // O que cada encoder comanda na janela FDDCP-1 do simulador (painel/src/Fd.cs).
+      alvo: ["RALT","ALTP","ALT","IAS","HDG"],
+      note: "Matriz e os encoders EN1 a EN3 na barra dos analógicos, embaixo. EN4 e EN5 na barra de cima, à direita. São 20 fios de sinal e o GND.", chave: CHAVE_FD },
+    // Mega 2: o giro de EN6 a EN9 nao coube no Mega 1. EN8 e EN9 sao duplos
+    // concentricos: anel (EN8) e miolo (EN8M) sao dois encoders.
+    { id: "fd2", grupo: "fd", title: "Flight Director, giro", sub: "FD, giro de EN6 a EN9 (EN8 e EN9 duplos)", L: [], C: [],
+      E: [["22","23"],["24","25"],["26","27"],["28","29"],["30","31"],["32","33"]],
+      EN: ["EN6","EN7","EN8","EN8M","EN9","EN9M"],
+      alvo: ["REF ADJ","REF SEL","NAV SRC, anel","NAV SRC / OBS, miolo","BRG, anel","BRG 1 / BRG 2, miolo"],
+      note: "Tudo na barra dupla, do D22 ao D33, em sequência: fio A na coluna de dentro (par), fio B na de fora (ímpar). São 12 fios de sinal e o GND." }
   ];
   // Conectores da placa PTT_Flight_Director v1.0, do pino 1 ao ultimo (esquematico de 09/11/2026).
   // "Fio novo": ROW4 e COL1 nao saem em conector nenhum; vao por fio soldado na placa (18/11/2026).
+  // "Fio novo, Mega 2": o giro de EN6 a EN9 tambem nao sai em conector; vai soldado direto
+  // nos pinos A e B de cada encoder, mais um GND para o Mega 2 (23/11/2026).
   var CONECTORES_FD = [
     ["H1", ["GND","ROW3","COL3","COL2","ROW2","ROW1"]],
     ["H2", ["EN1-A","EN1-B","EN2-B","EN2-A"]],
     ["H3", ["EN3-A","EN3-B","EN5-A","EN5-B","COL4","COL5"]],
     ["H4", ["EN4-A","EN4-B","COL6","COL5"]],
-    ["Fio novo", ["ROW4","COL1"]]
+    ["Fio novo", ["ROW4","COL1"]],
+    ["Fio novo, Mega 2", ["EN6-A","EN6-B","EN7-A","EN7-B","EN8-A","EN8-B","EN8M-A","EN8M-B","EN9-A","EN9-B","EN9M-A","EN9M-B","GND2"]]
   ];
-  // O que cada encoder comanda na janela FDDCP-1 do simulador (painel/src/Fd.cs).
-  var ALVO_FD = ["RALT","ALTP","ALT","IAS","HDG"];
 
   var BY = {};
   BOARDS.forEach(function (b) { BY[b.id] = b; });
   function label(p) { return /^\d+$/.test(p) ? "D" + p : p; }
+  function grupo(id) { return (BY[id] && BY[id].grupo) || id; }
 
-  // Papeis fixos primeiro; um painel so pode ocupar pino livre.
-  var role = {}, conflitos = [], desenhados = {};
-  ["0","1"].forEach(function (p) { role[p] = { g: "serial" }; });
-  ["13","14","15","16","17","18","19","20","21"].forEach(function (p) { role[p] = { g: "free" }; });
-  for (var n = 22; n <= 53; n++) role[String(n)] = { g: "free" };
-  for (var q = 2; q <= 12; q++) role[String(q)] = { g: "free" };
-  for (var a = 0; a < 16; a++) role["A" + a] = { g: "free" };
-  role["13"] = { g: "free", semMatriz: "LED da placa" };
-  role.SCL = { g: "alias", same: "D21" };
-  role.SDA = { g: "alias", same: "D20" };
-  ["NC","IOREF","RESET","3.3V","5V","GND","VIN","AREF"].forEach(function (p) { role[p] = { g: "power" }; });
-  function set(pins, g, kind, numero) {
+  var COLOR = { fms: "var(--fms)", m1: "var(--m1)", m2: "var(--m2)", fd: "var(--fd)", fd2: "var(--fd)" };
+  var NAME = { fms: "FMS", m1: "M1", m2: "M2", fd: "FD", fd2: "FD" };
+
+  // Em que Mega (0 ou 1) esta cada painel. Decisao de 18/11/2026: os quatro paineis no
+  // Mega 1. Decisao de 23/11/2026: o giro de EN6 a EN9 no Mega 2, com firmware proprio.
+  var ONDE = { fms: 0, m1: 0, m2: 0, fd: 0, fd2: 1 };
+  var MONTAGEM = { fms: 0, m1: 0, m2: 0, fd: 0, fd2: 1 };
+
+  // Papeis fixos primeiro, um mapa por Mega; um painel so pode ocupar pino livre do seu Mega.
+  var conflitos = [], desenhados = [{}, {}];
+  function papeisBase() {
+    var role = {};
+    ["0","1"].forEach(function (p) { role[p] = { g: "serial" }; });
+    ["13","14","15","16","17","18","19","20","21"].forEach(function (p) { role[p] = { g: "free" }; });
+    for (var n = 22; n <= 53; n++) role[String(n)] = { g: "free" };
+    for (var q = 2; q <= 12; q++) role[String(q)] = { g: "free" };
+    for (var a = 0; a < 16; a++) role["A" + a] = { g: "free" };
+    role["13"] = { g: "free", semMatriz: "LED da placa" };
+    role.SCL = { g: "alias", same: "D21" };
+    role.SDA = { g: "alias", same: "D20" };
+    ["NC","IOREF","RESET","3.3V","5V","GND","VIN","AREF"].forEach(function (p) { role[p] = { g: "power" }; });
+    return role;
+  }
+  var roles = [papeisBase(), papeisBase()];
+  function set(idx, pins, g, kind, numero, en) {
+    var role = roles[idx], onde = " no Mega " + (idx + 1);
     pins.forEach(function (p, i) {
-      if (!role[p] || role[p].g !== "free") conflitos.push(label(p) + " proibido (" + g + ")");
+      if (!role[p] || role[p].g !== "free") conflitos.push(label(p) + " proibido" + onde + " (" + g + ")");
       else if (role[p].semMatriz) conflitos.push(label(p) + " proibido em matriz: " + role[p].semMatriz + " (" + g + ")");
-      role[p] = { g: g, kind: kind, i: numero || i + 1 };
+      role[p] = { g: g, kind: kind, i: numero || i + 1, en: en };
     });
   }
   BOARDS.forEach(function (b) {
-    set(b.L, b.id, "L"); set(b.C, b.id, "C");
-    (b.E || []).forEach(function (par, k) { set([par[0]], b.id, "A", k + 1); set([par[1]], b.id, "B", k + 1); });
+    var idx = ONDE[b.id];
+    if (idx !== 0 && idx !== 1) { conflitos.push(NAME[b.id] + " sem Mega"); return; }
+    set(idx, b.L, b.id, "L"); set(idx, b.C, b.id, "C");
+    (b.E || []).forEach(function (par, k) { set(idx, [par[0]], b.id, "A", k + 1, b.EN[k]); set(idx, [par[1]], b.id, "B", k + 1, b.EN[k]); });
   });
-
-  var COLOR = { fms: "var(--fms)", m1: "var(--m1)", m2: "var(--m2)", fd: "var(--fd)" };
-  var NAME = { fms: "FMS", m1: "M1", m2: "M2", fd: "FD" };
-
-  // Em que Mega (0 ou 1) esta cada painel: todos no Mega 1 (decisao de 18/11/2026).
-  // O Mega 2 fica reservado para os proximos componentes, sem fio.
-  var ONDE = { fms: 0, m1: 0, m2: 0, fd: 0 };
 
   var megas = [document.getElementById("mega-0"), document.getElementById("mega-1")];
   var titulos = [document.getElementById("mega-h-0"), document.getElementById("mega-h-1")];
@@ -322,9 +345,9 @@ code { font-family: var(--font-mono); font-size: .92em; }
   function papel(r) {
     if (r.kind === "L") return "linha L" + r.i;
     if (r.kind === "C") return "coluna C" + r.i;
-    return "giro do encoder EN" + r.i + ", fio " + r.kind;
+    return "giro do encoder " + r.en + ", fio " + r.kind;
   }
-  function tagText(r) { return r.kind === "L" || r.kind === "C" ? r.kind + r.i : r.i + r.kind; }
+  function tagText(r) { return r.kind === "L" || r.kind === "C" ? r.kind + r.i : r.en.slice(2) + r.kind; }
 
   function desenharMega(idx) {
     var svg = megas[idx];
@@ -339,20 +362,18 @@ code { font-family: var(--font-mono); font-size: .92em; }
       return e;
     }
 
-    // Pino: desenha a forma e devolve o grupo. "aqui" = o painel do pino esta neste Mega.
+    // Pino: desenha a forma e devolve o grupo. "aqui" = o pino tem papel neste Mega.
     function pin(p, x, y) {
-      desenhados[p] = true;
-      var r = role[p];
+      desenhados[idx][p] = true;
+      var r = roles[idx][p];
       if (!r) { conflitos.push(p + " sem papel"); r = { g: "power" }; }
-      var aqui = !!r.kind && ONDE[r.g] === idx;
-      var g = el("g", { "class": "pin", "data-g": r.g });
+      var aqui = !!r.kind;
+      var g = el("g", { "class": "pin", "data-g": grupo(r.g) });
       pinEl[idx][p] = g;
       var tip = label(p);
       if (r.kind) {
-        var forma = aqui ? { fill: COLOR[r.g], stroke: "#0b1622", "stroke-width": 1 }
-                         : { fill: "var(--header)", stroke: "var(--off)", "stroke-width": 1.4, "stroke-dasharray": "2.5 2.5", opacity: 0.8 };
-        tip += aqui ? " = " + NAME[r.g] + " " + papel(r)
-          : " = reservado, sem fio. O v7 ainda lê este pino como " + NAME[r.g] + " " + papel(r) + ": não ligue nada até o firmware dos próximos componentes";
+        var forma = { fill: COLOR[r.g], stroke: "#0b1622", "stroke-width": 1 };
+        tip += " = " + NAME[r.g] + " " + papel(r);
         var a;
         if (r.kind === "L") a = { x: x - 7, y: y - 7, width: 14, height: 14 };
         else if (r.kind === "C") a = { cx: x, cy: y, r: 7.5 };
@@ -406,7 +427,7 @@ code { font-family: var(--font-mono); font-size: .92em; }
         var dy = below ? 1 : -1;
         el("text", { x: x, y: y + dy * 24 + (below ? 4 : 0), "text-anchor": "middle", fill: "var(--silk)", "font-family": "IBM Plex Mono, monospace", "font-size": p.length >= 5 ? 7 : p.length >= 3 ? 8.5 : 10.5, "font-weight": 500 }, res.g, p);
         if (res.aqui && fora) {
-          var cor = "var(--chip-" + res.r.g + ")";
+          var cor = "var(--chip-" + grupo(res.r.g) + ")";
           el("text", { x: x, y: y + 32, "text-anchor": "middle", fill: cor, "font-family": "IBM Plex Mono, monospace", "font-size": 9.5, "font-weight": 600 }, res.g, NAME[res.r.g]);
           el("text", { x: x, y: y + 43, "text-anchor": "middle", fill: cor, "font-family": "IBM Plex Mono, monospace", "font-size": 9.5, "font-weight": 600 }, res.g, tagText(res.r));
         } else if (res.aqui) {
@@ -440,14 +461,17 @@ code { font-family: var(--font-mono); font-size: .92em; }
     el("text", { x: 380, y: 122, "text-anchor": "middle", fill: "var(--silk)", "font-family": "IBM Plex Sans, sans-serif", "font-size": 10, "letter-spacing": 1 }, null, "PWM");
     el("text", { x: 774, y: 122, "text-anchor": "middle", fill: "var(--silk)", "font-family": "IBM Plex Sans, sans-serif", "font-size": 10, "letter-spacing": 1 }, null, "COMMUNICATION");
 
-    // O unico fio que vai em GND: o comum dos encoders do Flight Director (conector H1, pino 1).
-    if (ONDE.fd === idx) {
+    // O unico fio que vai em GND em cada Mega: o comum dos encoders do Flight Director
+    // (Mega 1: conector H1, pino 1; Mega 2: fio novo soldado no GND da placa).
+    if (ONDE.fd === idx || ONDE.fd2 === idx) {
       var gx = 236 + 5 * PITCH, gy = 522;
       var gg = el("g", { "class": "pin", "data-g": "fd" });
       el("rect", { x: gx - 10, y: gy - 10, width: 20, height: 20, rx: 3, fill: "none", stroke: COLOR.fd, "stroke-width": 2 }, gg);
       el("text", { x: gx, y: gy - 38, "text-anchor": "middle", fill: COLOR.fd, "font-family": "IBM Plex Mono, monospace", "font-size": 10, "font-weight": 600 }, gg, "FD");
       el("text", { x: gx, y: gy - 50, "text-anchor": "middle", fill: COLOR.fd, "font-family": "IBM Plex Mono, monospace", "font-size": 10, "font-weight": 600 }, gg, "GND");
-      el("title", {}, gg, "GND = comum dos encoders do Flight Director (conector H1, pino 1). É o único fio de placa que vai em GND");
+      el("title", {}, gg, ONDE.fd === idx
+        ? "GND = comum dos encoders do Flight Director (conector H1, pino 1). É o único fio de placa que vai em GND"
+        : "GND = comum dos encoders EN6 a EN9 do Flight Director (fio novo soldado no GND da placa). É o único fio que vai em GND neste Mega");
     }
 
     // Barra dupla da direita: par na coluna de dentro, ímpar na de fora
@@ -476,10 +500,10 @@ code { font-family: var(--font-mono); font-size: .92em; }
     [0, 1].forEach(function (idx) {
       var aqui = BOARDS.filter(function (b) { return ONDE[b.id] === idx; });
       var fios = 0;
-      aqui.forEach(function (b) { fios += pinosDe(b).length + (b.id === "fd" ? 1 : 0); });
+      aqui.forEach(function (b) { fios += pinosDe(b).length + (grupo(b.id) === "fd" ? 1 : 0); });  // + o GND
       titulos[idx].innerHTML = "Mega " + (idx + 1) + " " +
         (aqui.length ? aqui.map(function (b) {
-          return "<span class=\"chip\"><span class=\"dot\" style=\"background:var(--" + b.id + ")\"></span>" + b.title + "</span>";
+          return "<span class=\"chip\"><span class=\"dot\" style=\"background:var(--" + grupo(b.id) + ")\"></span>" + b.title + "</span>";
         }).join(" ") + " <small>" + fios + " fios</small>"
         : "<small>reservado para os próximos componentes, sem nenhum fio</small>");
     });
@@ -490,21 +514,29 @@ code { font-family: var(--font-mono); font-size: .92em; }
   desenharTitulos();
 
   BOARDS.forEach(function (b) {
-    pinosDe(b).forEach(function (p) { if (!desenhados[p]) conflitos.push(label(p) + " fora do desenho"); });
+    var idx = ONDE[b.id];
+    pinosDe(b).forEach(function (p) { if (!desenhados[idx] || !desenhados[idx][p]) conflitos.push(label(p) + " fora do desenho"); });
   });
 
-  // Montagem decidida em 18/11/2026: os quatro paineis no Mega 1, o Mega 2 sem fio.
-  BOARDS.forEach(function (b) { if (ONDE[b.id] !== 0) conflitos.push(NAME[b.id] + " fora do Mega 1"); });
+  // Montagem decidida: os quatro paineis no Mega 1 (18/11/2026), o giro de EN6 a EN9 no Mega 2 (23/11/2026).
+  BOARDS.forEach(function (b) {
+    if (ONDE[b.id] !== MONTAGEM[b.id]) conflitos.push(b.title + " fora do Mega " + (MONTAGEM[b.id] + 1));
+  });
 
   // Todo sinal dos conectores do Flight Director (e dos fios novos) tem de cair num pino.
-  var fd = BY.fd;
+  var fd = BY.fd, fd2 = BY.fd2;
+  var giros = [];  // { b, k }: cada encoder com giro ligado, nos dois Megas
+  [fd, fd2].forEach(function (b) { b.E.forEach(function (par, k) { giros.push({ b: b, k: k }); }); });
   function pinoDoSinal(s) {
-    var m, p;
+    var m, p, b = fd;
     if (s === "GND") return "GND";
+    if (s === "GND2") return "GND do Mega " + (ONDE.fd2 + 1);
     if ((m = /^ROW(\d)$/.exec(s))) p = fd.L[m[1] - 1];
     else if ((m = /^COL(\d)$/.exec(s))) p = fd.C[m[1] - 1];
-    else if ((m = /^EN(\d)-([AB])$/.exec(s))) p = fd.E[m[1] - 1] && fd.E[m[1] - 1][m[2] === "A" ? 0 : 1];
-    return p ? label(p) : null;
+    else if ((m = /^(EN\dM?)-([AB])$/.exec(s))) {
+      giros.forEach(function (gi) { if (gi.b.EN[gi.k] === m[1]) { b = gi.b; p = gi.b.E[gi.k][m[2] === "A" ? 0 : 1]; } });
+    }
+    return p ? label(p) + (ONDE[b.id] !== ONDE.fd ? " do Mega " + (ONDE[b.id] + 1) : "") : null;
   }
   var ligados = {};
   CONECTORES_FD.forEach(function (c) {
@@ -512,10 +544,10 @@ code { font-family: var(--font-mono); font-size: .92em; }
   });
   // E o contrario: todo pino do Flight Director tem de sair em algum conector ou fio
   // novo, senao a ficha omite o fio e as teclas dele ficam mudas sem aviso.
-  var precisa = ["GND"];
+  var precisa = ["GND", "GND2"];
   fd.L.forEach(function (p, i) { precisa.push("ROW" + (i + 1)); });
   fd.C.forEach(function (p, i) { precisa.push("COL" + (i + 1)); });
-  fd.E.forEach(function (par, i) { precisa.push("EN" + (i + 1) + "-A", "EN" + (i + 1) + "-B"); });
+  giros.forEach(function (gi) { precisa.push(gi.b.EN[gi.k] + "-A", gi.b.EN[gi.k] + "-B"); });
   precisa.forEach(function (s) { if (!ligados[s]) conflitos.push(s + " sem conector nem fio novo"); });
 
   if (conflitos.length) {
@@ -532,13 +564,16 @@ code { font-family: var(--font-mono); font-size: .92em; }
     function rows(list, k) {
       return list.map(function (p, i) { return "<tr><td>" + k + (i + 1) + "</td><td class=\"pinv\">" + label(p) + "</td></tr>"; }).join("");
     }
-    var html = "<h2><span class=\"dot\" style=\"background:var(--" + b.id + ");width:14px;height:14px\"></span>" + b.title + " <small>" + b.sub + "</small></h2>" +
-      "<div class=\"tables\"><table><thead><tr><th>Linha</th><th>Pino</th></tr></thead><tbody>" + rows(b.L, "L") + "</tbody></table>" +
-      "<table><thead><tr><th>Coluna</th><th>Pino</th></tr></thead><tbody>" + rows(b.C, "C") + "</tbody></table>";
+    var html = "<h2><span class=\"dot\" style=\"background:var(--" + grupo(b.id) + ");width:14px;height:14px\"></span>" + b.title + " <small>" + b.sub + ", Mega " + (ONDE[b.id] + 1) + "</small></h2>" +
+      "<div class=\"tables\">";
+    if (b.L.length) {
+      html += "<table><thead><tr><th>Linha</th><th>Pino</th></tr></thead><tbody>" + rows(b.L, "L") + "</tbody></table>" +
+        "<table><thead><tr><th>Coluna</th><th>Pino</th></tr></thead><tbody>" + rows(b.C, "C") + "</tbody></table>";
+    }
     if (b.E) {
       html += "<table><thead><tr><th>Giro</th><th>Fio A</th><th>Fio B</th><th>Comanda</th></tr></thead><tbody>" +
         b.E.map(function (par, i) {
-          return "<tr><td>EN" + (i + 1) + "</td><td class=\"pinv\">" + label(par[0]) + "</td><td class=\"pinv\">" + label(par[1]) + "</td><td>" + ALVO_FD[i] + "</td></tr>";
+          return "<tr><td>" + b.EN[i] + "</td><td class=\"pinv\">" + label(par[0]) + "</td><td class=\"pinv\">" + label(par[1]) + "</td><td>" + b.alvo[i] + "</td></tr>";
         }).join("") + "</tbody></table>";
     }
     html += "</div>";
@@ -548,13 +583,19 @@ code { font-family: var(--font-mono); font-size: .92em; }
         "<div class=\"tscroll\"><table><thead><tr><th>Conector</th><th>Pino do conector</th><th>Sinal</th><th>Pino do Mega</th></tr></thead><tbody>" +
         CONECTORES_FD.map(function (c) {
           return c[1].map(function (s, i) {
-            return "<tr><td>" + (i === 0 ? c[0] : "") + "</td><td>" + (c[0] === "Fio novo" ? "solda na trilha" : i + 1) + "</td><td class=\"sig\">" + s + "</td><td class=\"pinv\">" + pinoDoSinal(s) + "</td></tr>";
+            var onde = c[0] === "Fio novo" ? "solda na trilha" : c[0] === "Fio novo, Mega 2" ? (s === "GND2" ? "solda no GND da placa" : "solda no pino do encoder") : i + 1;
+            return "<tr><td>" + (i === 0 ? c[0] : "") + "</td><td>" + onde + "</td><td class=\"sig\">" + (s === "GND2" ? "GND" : s) + "</td><td class=\"pinv\">" + pinoDoSinal(s) + "</td></tr>";
           }).join("");
         }).join("") + "</tbody></table></div>" +
         "<div class=\"warn\"><strong>O GND do H1 é obrigatório.</strong> Ele é o comum dos encoders: sem esse fio as teclas funcionam e o giro fica mudo. Trocar o fio A com o B de um encoder só inverte o sentido.</div>" +
         "<div class=\"warn\"><strong>Dois fios novos, soldados na placa.</strong> ROW4 e COL1 não saem em nenhum conector do esquemático v1.0. Solde um fio na trilha de ROW4 e leve ao <strong>" + label(fd.L[3]) + "</strong>, e outro na de COL1 até o <strong>" + label(fd.C[0]) + "</strong> (linhas \"Fio novo\" da tabela). Sem eles, 9 das 22 posições ficam mudas: os eixos de EN6 a EN9, SW37 (DECL), SW49 e os eixos de EN2, EN3 e EN5. Teste: apertar a SW37 dá <code>P FD L4 C2 SW37</code> e clica DECL.</div>" +
-        "<div class=\"warn\"><strong>Pendências do esquemático v1.0</strong>, a confirmar com quem desenhou a placa: ROW4 e COL1 sem conector (resolvido acima por fio), COL5 em dois conectores, H3 e H4 (basta ligar um), e o giro de EN6 a EN9 não ligado na placa, só o aperto do eixo.</div>" +
+        "<div class=\"warn\"><strong>Pendências do esquemático v1.0</strong>, a confirmar com quem desenhou a placa: ROW4 e COL1 sem conector (resolvido acima por fio), COL5 em dois conectores, H3 e H4 (basta ligar um), e o giro de EN6 a EN9 sem conector (resolvido por fios soldados até o Mega 2, ficha abaixo).</div>" +
         "<p>O Flight Director comanda a janela FDDCP-1 do simulador. O giro de EN1 a EN5 aciona o \"+\" ou o \"−\" de RALT, ALTP, ALT, IAS e HDG. Cada tecla e cada aperto de eixo aciona o botão na mesma posição da janela, da esquerda para a direita: a coluna do esquemático é a coluna da FDDCP-1.</p>";
+    } else if (b.id === "fd2") {
+      html += "<p>" + b.note + " O aperto do eixo desses quatro encoders continua na matriz do Mega 1.</p>" +
+        "<div class=\"warn\"><strong>Doze fios e um GND, soldados na placa.</strong> O esquemático v1.0 não leva o giro de EN6 a EN9 a conector nenhum. Solde cada fio direto no pino A ou B do encoder e leve um GND da placa ao GND do Mega 2: ele é o comum desses encoders, sem ele o giro fica mudo.</div>" +
+        "<div class=\"warn\"><strong>EN8 e EN9 são duplos.</strong> O anel de fora e o miolo são dois encoders no mesmo eixo, cada um com o seu A e B. Girando o anel do EN8 o Mega 2 manda <code>G FD EN8 +</code>; girando o miolo, <code>G FD EN8M +</code>. Se sair trocado, troque os pares de fio de lugar.</div>" +
+        "<p>O giro aciona o \"+\" ou o \"−\" de REF ADJ e REF SEL, e nos duplos o de fora (anel) ou o de dentro (miolo) de NAV SRC / OBS e de BRG 1 / BRG 2 na janela FDDCP-1.</p>";
     } else {
       html += (b.id === "m1" ? "<div class=\"warn\">" + b.note + "</div>" : "<p>" + b.note + "</p>");
     }
@@ -564,7 +605,7 @@ code { font-family: var(--font-mono); font-size: .92em; }
     cards.appendChild(c);
   });
 
-  // Destaque de pinos: no Mega do painel (hoje sempre o Mega 1, conferido acima).
+  // Destaque de pinos: no Mega do painel.
   var pinosAcesos = [];
   function acenderPinos(boardId, lista) {
     pinosAcesos.forEach(function (e) { e.setAttribute("class", "pin"); });
@@ -681,11 +722,12 @@ code { font-family: var(--font-mono); font-size: .92em; }
   var enTabs = document.getElementById("tabs-en"), enSteps = document.getElementById("en-steps"), enBotoes = [], enAtual = 0;
   function escolherEncoder(n, acender) {
     enAtual = n;
-    var par = fd.E[n], nome = "EN" + (n + 1);
+    var b = giros[n].b, k = giros[n].k, par = b.E[k], nome = b.EN[k];
+    var duplo = /^EN[89]/.test(nome) ? (/M$/.test(nome) ? " É o miolo do encoder duplo " + nome.slice(0, 3) + "." : " É o anel de fora do encoder duplo " + nome + "; o miolo é o " + nome + "M.") : "";
     enBotoes.forEach(function (o, i) { o.setAttribute("aria-pressed", i === n ? "true" : "false"); });
-    if (acender) acenderPinos("fd", par);
+    if (acender) acenderPinos(b.id, par);
     enSteps.innerHTML =
-      "<p class=\"ghost\">" + nome + ", no Mega " + (ONDE.fd + 1) + ": fio A no <strong>" + label(par[0]) + "</strong>, fio B no <strong>" + label(par[1]) + "</strong>, comum no GND.</p>" +
+      "<p class=\"ghost\">" + nome + ", no Mega " + (ONDE[b.id] + 1) + ": fio A no <strong>" + label(par[0]) + "</strong>, fio B no <strong>" + label(par[1]) + "</strong>, comum no GND." + duplo + "</p>" +
       "<ol>" +
       "<li>Os pinos <strong>" + label(par[0]) + "</strong> e <strong>" + label(par[1]) + "</strong> ficam em INPUT_PULLUP, lendo HIGH. O terminal do meio do encoder vai no GND.</li>" +
       "<li>A cada clique do eixo, A e B encostam no GND e soltam, um depois do outro. São 4 mudanças por clique.</li>" +
@@ -693,13 +735,13 @@ code { font-family: var(--font-mono); font-size: .92em; }
       "<li>O firmware soma as 4 mudanças e manda uma linha por clique:</li>" +
       "</ol>" +
       "<pre>G FD " + nome + " +</pre>" +
-      "<p>No outro sentido vem <code>-</code> no lugar do <code>+</code>. O Painel transforma cada linha num clique no \"+\" ou no \"−\" do botão <strong>" + ALVO_FD[n] + "</strong> da janela FDDCP-1 do simulador.</p>" +
+      "<p>No outro sentido vem <code>-</code> no lugar do <code>+</code>. O Painel transforma cada linha num clique no \"+\" ou no \"−\" do botão <strong>" + b.alvo[k] + "</strong> da janela FDDCP-1 do simulador.</p>" +
       "<p class=\"ghost\">O tremor do contato e o eixo que passa um pouco do encaixe não geram linha: só um clique inteiro conta.</p>";
   }
-  fd.E.forEach(function (par, n) {
+  giros.forEach(function (gi, n) {
     var btn = document.createElement("button");
     btn.type = "button";
-    btn.textContent = "EN" + (n + 1) + " · " + ALVO_FD[n];
+    btn.textContent = gi.b.EN[gi.k] + " · " + gi.b.alvo[gi.k];
     btn.setAttribute("aria-pressed", "false");
     btn.addEventListener("click", function () { escolherEncoder(n, true); });
     enTabs.appendChild(btn);
