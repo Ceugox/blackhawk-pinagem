@@ -69,7 +69,7 @@ code { font-family: var(--font-mono); font-size: .92em; }
 .toc a { color: var(--fg-2); text-decoration: none; font: 600 var(--fs-md) var(--font-body); padding: var(--sp-2) var(--sp-3); border-radius: var(--radius-sm); min-height: var(--tap); display: inline-flex; align-items: center; }
 .toc a:hover { background: var(--surface-2); color: var(--fg); }
 .toc a:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
-.secao, header { scroll-margin-top: 56px; }
+.secao, header, .board > .mega-h { scroll-margin-top: 56px; }
 @media (max-width: 560px) { .secao, header, .board > .mega-h { scroll-margin-top: 100px; } }
 
 header h1 { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-2xl); line-height: 1.1; margin: var(--sp-4) 0 0; text-wrap: balance; }
@@ -110,7 +110,7 @@ header p { margin: var(--sp-2) 0 0; color: var(--fg-2); max-width: var(--measure
 .board > svg { display: block; width: 100%; min-width: 760px; height: auto; }
 .mega-h { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-xl); margin: 2px 4px var(--sp-3); display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-3); }
 .mega-h small { font: 500 var(--fs-sm) var(--font-body); color: var(--muted); }
-.board > .mega-h { position: sticky; left: 0; scroll-margin-top: 56px; }  /* no celular o desenho rola de lado; o titulo fica */
+.board > .mega-h { position: sticky; left: 0; }  /* no celular o desenho rola de lado; o titulo fica */
 .chip { font: 600 var(--fs-sm) var(--font-body); display: inline-flex; align-items: center; gap: 6px; }
 .legend { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-5); color: var(--muted); font-size: var(--fs-sm); padding: 2px 4px; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
