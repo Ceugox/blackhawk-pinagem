@@ -28,7 +28,8 @@ node ci/check.js
 
 Falha se um pino estiver em dois painéis do mesmo Mega, se uma matriz ou um encoder usar
 pino proibido (serial, D13, energia, SCL/SDA), se um pino for desenhado sem
-papel ou listado em `BOARDS` sem aparecer no desenho. Também planta 21
+papel ou listado em `BOARDS` sem aparecer no desenho, se a ficha não mandar o
+giro de EN6 a EN9 ao Mega 2 ou se alguma aba de encoder quebrar. Também planta 21
 defeitos e exige que cada um gere o erro certo. Também falha se um sinal
 de conector do Flight Director não cair num pino do Mega, se um fio do
 Flight Director não sair em nenhum conector ou fio novo, ou se um painel sair
