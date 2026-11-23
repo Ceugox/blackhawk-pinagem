@@ -40,6 +40,11 @@ const plantados = [
   ['["16","17"]', '["16","13"]', "D13 proibido", "giro de encoder no D13 do LED"],
   ['"A8","A9"]', '"A8","22"]', "D22 proibido", "Flight Director em pino do FMS"],
   ['["14","15"]', '["14","54"]', "D54 proibido", "giro de encoder em pino que nao existe"],
+  ['["ROW4","COL1"]', '["ROW4","COL7"]', "Fio novo COL7 sem pino do Mega", "sinal de conector sem pino (coluna que nao existe)"],
+  ['["EN4-A","EN4-B","COL6","COL5"]', '["EN9-A","EN4-B","COL6","COL5"]', "H4 EN9-A sem pino do Mega", "sinal de encoder sem giro ligado"],
+  ['fd: 0 }', 'fd: 1 }', "FD fora do Mega 1", "painel fora do Mega 1"],
+  ['["ROW4","COL1"]', '["COL1"]', "ROW4 sem conector nem fio novo", "fio do Flight Director fora dos conectores"],
+  ['["GND","ROW3"', '["ROW3"', "GND sem conector nem fio novo", "GND dos encoders fora dos conectores"],
 ];
 for (const [de, para, esperado, nome] of plantados) {
   if (!m[1].includes(de)) { console.log("defeito plantado nao se aplica: " + nome); process.exit(1); }
