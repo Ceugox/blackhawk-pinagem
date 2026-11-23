@@ -684,6 +684,9 @@ code { font-family: var(--font-mono); font-size: .92em; }
       if (!posNaMatriz(CHAVE_FD, b.chave)) conflitos.push("Painel FDDCP-1: " + b.nome + " sem posição na matriz do FD");
       if (chavesFd[b.chave]) conflitos.push("Painel FDDCP-1: " + b.chave + " em dois botões");
       chavesFd[b.chave] = true;
+      // O giro e do mesmo encoder do eixo: anel = chave, miolo = chave + "M".
+      if (b.giro && (b.giro[0] !== b.chave || (b.giro.length > 1 && b.giro[1] !== b.chave + "M") || b.giro.length > 2))
+        conflitos.push("Painel FDDCP-1: giro de " + b.nome + " não é do encoder " + b.chave);
       (b.giro || []).forEach(function (en) {
         if (!fiosDoGiro(en)) conflitos.push("Painel FDDCP-1: giro " + en + " de " + b.nome + " sem fios");
         girosFd[en] = true;
@@ -982,7 +985,9 @@ code { font-family: var(--font-mono); font-size: .92em; }
     pn.setAttribute("viewBox", "0 0 1359 347");
     pnEl("rect", { x: 2, y: 2, width: 1355, height: 343, rx: 14, fill: "#3a3f45", stroke: "#1c1f23", "stroke-width": 3 });
     LAYOUT_FDDCP.forEach(function (b) {
-      var fd = BY.fd, pos = posNaMatriz(CHAVE_FD, b.chave), i = pos[0], j = pos[1];
+      var fd = BY.fd, pos = posNaMatriz(CHAVE_FD, b.chave);
+      if (!pos) return;  // ja acusado nos conflitos
+      var i = pos[0], j = pos[1];
       var giratorio = !!b.giro, duplo = giratorio && b.giro.length > 1;
       var cx = b.x + b.w / 2, cy = b.y + b.h / 2, r = b.w / 2;
       var g = botao(giratorio ? "circle" : "rect",
