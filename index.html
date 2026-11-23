@@ -253,6 +253,17 @@ code { font-family: var(--font-mono); font-size: .92em; }
     [ 5,  7, 13, 20, 27, 34, 78, 46, 53, 60, 67, 72],
     [-1,  6, 12, 19, 26, 33, 40, 45, 52, 59, 66, -1]
   ];
+  // Botao da janela FMS-1 do simulador em cada posicao do teclado (ComandoFms.Teclas
+  // do Painel, 23/11/2026): a placa tem a mesma disposicao da janela. null = sem tecla.
+  var FMS1 = [
+    ["D➛", "BRT", "1", "2", "3", "A", "B", "C", "D", "E", "F", "IDNT"],
+    ["SK1", "DIM", "4", "5", "6", "G", "H", "I", "J", "K", "L", "SK6"],
+    ["SK2", "PRV", "7", "8", "9", "M", "N", "O", "P", "Q", "R", "SK7"],
+    ["SK3", "NXT", ".", "0", "+/-", "S", "T", "U", "V", "W", null, "SK8"],
+    ["SK4", null, "←", "→", "↑", "↓", "X", "Y", "Z", "SPC", null, "SK9"],
+    ["SK5", "COM", "NAV", "EGI", "FPN", "DAT", "CLC", "FIX", "F1", "F2", "MSN", "SK10"],
+    [null, "CLR", "XPD", "INI", "ZRO", "STS", "TST", "PPS", "F3", "F4", "ENT", null]
+  ];
   // Flight Director (CHAVE_FD do firmware): numero = SW, texto = eixo do encoder, -1 = sem tecla.
   var CHAVE_FD = [
     ["EN8", 36,    12,    -1,    45, 48],
@@ -262,7 +273,7 @@ code { font-family: var(--font-mono); font-size: .92em; }
   ];
   var BOARDS = [
     { id: "fms", title: "Teclado FMS", sub: "7 linhas × 12 colunas, 79 teclas", L: ["22","24","26","28","30","32","34"], C: ["23","25","27","29","31","33","35","37","39","41","43","45"],
-      note: "Tudo na barra dupla: linhas na coluna de dentro (pares), colunas na de fora (ímpares). São 19 fios.", chave: CHAVE_FMS },
+      note: "Tudo na barra dupla: linhas na coluna de dentro (pares), colunas na de fora (ímpares). São 19 fios. Cada tecla aperta o botão na mesma posição da janela FMS-1 do simulador (veja \"Como uma tecla é lida\", aba Teclado FMS).", chave: CHAVE_FMS },
     { id: "m1", title: "M1", sub: "placa de 32 botões, 4 × 8", L: ["2","3","4","5"], C: ["6","7","8","9","10","11","12","44"],
       note: "Linhas e C1 a C7 na barra de cima. A C8 vai no D44, na barra dupla, lado de dentro, na mesma fileira do D45 (C12 do FMS): confira o furo antes de espetar." },
     { id: "m2", title: "M2", sub: "placa de 32 botões, 4 × 8 (não é o Mega 2)", L: ["36","38","40","42"], C: ["46","47","48","49","50","51","52","53"],
@@ -550,6 +561,15 @@ code { font-family: var(--font-mono); font-size: .92em; }
   giros.forEach(function (gi) { precisa.push(gi.b.EN[gi.k] + "-A", gi.b.EN[gi.k] + "-B"); });
   precisa.forEach(function (s) { if (!ligados[s]) conflitos.push(s + " sem conector nem fio novo"); });
 
+  var nomesFms = {};
+  FMS1.forEach(function (linha, i) {
+    linha.forEach(function (n, j) {
+      if ((n == null) !== (CHAVE_FMS[i][j] === -1)) conflitos.push("FMS L" + (i + 1) + " C" + (j + 1) + ": nome e SW não batem");
+      if (n != null) { if (nomesFms[n]) conflitos.push("FMS-1 " + n + " repetido"); nomesFms[n] = true; }
+    });
+  });
+  if (Object.keys(nomesFms).length !== 79) conflitos.push("FMS-1 com " + Object.keys(nomesFms).length + " botões, esperado 79");
+
   if (conflitos.length) {
     var w = document.createElement("div");
     w.className = "warn";
@@ -663,7 +683,10 @@ code { font-family: var(--font-mono); font-size: .92em; }
           var eixo = typeof k === "string";
           var g = mxEl("g", { "class": "mx-btn", tabindex: 0, role: "button", "aria-label": (eixo ? "Eixo do encoder " + k : "Tecla") + " L" + (i + 1) + " C" + (j + 1) });
           var r = mxEl("rect", { x: x - 13, y: y - 13, width: 26, height: 26, rx: eixo ? 13 : 5, fill: "var(--surface)", stroke: "var(--muted)", "stroke-width": 1.2 }, g);
-          mxEl("text", { x: x, y: y + 3.5, "text-anchor": "middle", fill: "var(--fg)", "font-family": mono, "font-size": eixo ? 8.5 : 9.5, "font-weight": 600 }, g, k != null ? String(k) : "");
+          var nomeFms = id === "fms" ? FMS1[i][j] : null;  // no FMS, o nome do botao da janela FMS-1
+          var texto = nomeFms != null ? nomeFms : k != null ? String(k) : "";
+          mxEl("text", { x: x, y: y + 3.5, "text-anchor": "middle", fill: "var(--fg)", "font-family": mono, "font-size": eixo || texto.length > 3 ? 8.5 : 9.5, "font-weight": 600 }, g, texto);
+          if (nomeFms != null) mxEl("title", {}, g, nomeFms + " = SW" + k + ", L" + (i + 1) + " C" + (j + 1));
           botoesEl[i + "," + j] = r;
           g.addEventListener("click", function () { selecionar(i, j); });
           g.addEventListener("keydown", function (ev) {
@@ -674,6 +697,7 @@ code { font-family: var(--font-mono); font-size: .92em; }
     }
     mxEl("text", { x: w - 12, y: h - 4, "text-anchor": "end", fill: "var(--muted)", "font-family": mono, "font-size": 9 }, null,
       id === "fd" ? "número = SW; redondo = eixo de encoder; tracejado = sem tecla" :
+      id === "fms" ? "nome = botão da janela FMS-1; tracejado = sem tecla" :
       b.chave ? "número = SW do esquemático; tracejado = sem tecla" : "cada quadrado é um botão");
   }
 
@@ -706,6 +730,7 @@ code { font-family: var(--font-mono); font-size: .92em; }
       "<li>LOW em " + C + " durante a vez de " + L + " indica esta posição, se só ela estiver apertada. Depois de 3 leituras iguais, cerca de 15 ms, o Mega envia:</li>" +
       "</ol>" +
       "<pre>P " + pre + L + " " + C + fim + "</pre>" +
+      (b.id === "fms" && FMS1[i][j] != null ? "<p>O Painel clica <strong>" + FMS1[i][j] + "</strong> na janela FMS-1 do simulador.</p>" : "") +
       "<p>Ao soltar, vem a mesma linha com <code>R</code> no lugar do <code>P</code>. A varredura passa pelas " + b.L.length + " linhas a cada 5 ms. Toque com menos de cerca de 15 ms é descartado como ruído do contato.</p>" +
       "<p class=\"ghost\">A placa não tem diodos: apertar três teclas que formem três cantos de um retângulo faz o quarto canto parecer apertado. Aperte uma de cada vez.</p>";
   }
