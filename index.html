@@ -179,7 +179,7 @@ code { font-family: var(--font-mono); font-size: .92em; }
     <p>Cada painel desenhado como no simulador. Clique num botão para ver o que aciona ele: em que Mega, em quais pinos e que linha o Mega manda. Num giratório aparecem o giro e o aperto do eixo; nos duplos (NAV SRC / OBS e BRG 1 / BRG 2), o anel e o miolo separados. Os pinos acendem no desenho do Mega.</p>
     <div class="tabs" id="tabs-pn" role="group" aria-label="Escolher o painel"></div>
     <div class="scheme-grid">
-      <div class="pn-wrap"><svg id="pn" viewBox="0 0 600 600" role="img" aria-label="Painel escolhido, com um botão para cada tecla ou giratório"></svg></div>
+      <div class="pn-wrap"><svg id="pn" viewBox="0 0 600 600" role="group" aria-label="Painel escolhido, com um botão para cada tecla ou giratório"></svg></div>
       <div class="steps" id="pn-info" aria-live="polite"></div>
     </div>
   </section>
@@ -194,7 +194,7 @@ code { font-family: var(--font-mono); font-size: .92em; }
       <button type="button" data-m="fd" aria-pressed="false">Flight Director 4×6</button>
     </div>
     <div class="scheme-grid">
-      <div class="mx-wrap"><svg id="mx" viewBox="0 0 640 380" role="img" aria-label="Esquema da matriz escolhida, com linhas, colunas e teclas"></svg></div>
+      <div class="mx-wrap"><svg id="mx" viewBox="0 0 640 380" role="group" aria-label="Esquema da matriz escolhida, com linhas, colunas e teclas"></svg></div>
       <div class="steps" id="mx-steps" aria-live="polite"></div>
     </div>
   </section>
@@ -933,19 +933,22 @@ code { font-family: var(--font-mono); font-size: .92em; }
       "<dt>Fio B</dt><dd>" + label(par[1]) + "</dd>" +
       "<dt>Comum</dt><dd>GND do Mega " + (ONDE[f.board.id] + 1) + "</dd>" +
       "<dt>No simulador</dt><dd>" + esc(aaps) + "</dd>" +
-      "</dl><pre>G FD " + en + " +</pre><p class=\"ghost\">Um clique para o outro lado manda <code>-</code>. Trocar A com B inverte o sentido.</p></div>" };
+      "</dl><pre>G FD " + en + " +</pre><p class=\"ghost\">Um clique para o outro lado manda <code>-</code>. Se girar no sentido contrário, troque A com B; num duplo, se o anel mexer no miolo, troque os pares de fio do anel e do miolo.</p></div>" };
   }
   function mostrar(titulo, blocos, g) {
-    if (pnSel) pnSel.setAttribute("class", "pn-btn");
-    pnSel = g; g.setAttribute("class", "pn-btn sel");
+    if (pnSel) { pnSel.setAttribute("class", "pn-btn"); pnSel.setAttribute("aria-pressed", "false"); }
+    pnSel = g; g.setAttribute("class", "pn-btn sel"); g.setAttribute("aria-pressed", "true");
     acenderGrupos(blocos.map(function (b) { return b.grupo; }));
     pnInfo.innerHTML = "<p class=\"ghost\">" + esc(titulo) + "</p>" + blocos.map(function (b) { return b.html; }).join("");
   }
   function botao(forma, attrs, rotulo, tx, ty, fonte, aoClicar, nomeCompleto) {
     var g = pnEl("g", { "class": "pn-btn", tabindex: 0, role: "button", "aria-label": "Painel: " + (nomeCompleto || rotulo) });
     attrs["class"] = "pn-forma";
+    g.setAttribute("aria-pressed", "false");
     pnEl(forma, attrs, g);
-    pnEl("text", { x: tx, y: ty, "text-anchor": "middle", fill: "#e8edf2", "font-family": "IBM Plex Mono, monospace", "font-size": fonte, "font-weight": 600, "pointer-events": "none" }, g, rotulo);
+    rotulo.split("|").forEach(function (linha, k) {
+      pnEl("text", { x: tx, y: ty + k * fonte * 1.15, "text-anchor": "middle", fill: "#e8edf2", "font-family": "IBM Plex Mono, monospace", "font-size": fonte, "font-weight": 600, "pointer-events": "none" }, g, linha);
+    });
     g.addEventListener("click", function () { aoClicar(g); });
     g.addEventListener("keydown", function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); aoClicar(g); } });
     return g;
@@ -969,6 +972,12 @@ code { font-family: var(--font-mono); font-size: .92em; }
     });
   }
 
+  // Rotulo desenhado: "|" quebra a linha (duplos e a estacao sem nome).
+  function rotuloFd(nome) {
+    return nome.replace(" P-SYNC", "").replace(" / ", "|").replace("(sem nome)", "sem|nome");
+  }
+  function maiorLinha(r) { return Math.max.apply(null, r.split("|").map(function (l) { return l.length; })); }
+
   function desenharFddcp() {
     pn.setAttribute("viewBox", "0 0 1359 347");
     pnEl("rect", { x: 2, y: 2, width: 1355, height: 343, rx: 14, fill: "#3a3f45", stroke: "#1c1f23", "stroke-width": 3 });
@@ -979,7 +988,8 @@ code { font-family: var(--font-mono); font-size: .92em; }
       var g = botao(giratorio ? "circle" : "rect",
         giratorio ? { cx: cx, cy: cy, r: r - 4, fill: "#5a6068", stroke: "#1c1f23", "stroke-width": 2 }
                   : { x: b.x + 8, y: b.y + 6, width: b.w - 16, height: b.h - 40, rx: 6, fill: "#0b0f0c", stroke: "#1c1f23", "stroke-width": 2 },
-        b.nome.replace(" P-SYNC", ""), cx, giratorio ? b.y + b.h + 18 : b.y + 48, giratorio ? 15 : 20, function (gg) {
+        rotuloFd(b.nome), cx, giratorio ? b.y + b.h + 24 : b.y + (rotuloFd(b.nome).indexOf("|") >= 0 ? 40 : 52),
+        giratorio ? 21 : Math.min(26, Math.floor((b.w - 22) / (0.62 * maiorLinha(rotuloFd(b.nome))))), function (gg) {
           var blocos = [];
           if (duplo) {
             blocos.push(blocoGiro("Girar o anel (de fora)", b.giro[0], "+/− de fora do " + b.alvo));
@@ -1019,6 +1029,7 @@ code { font-family: var(--font-mono); font-size: .92em; }
     pnSel = null;
     pnBotoes.forEach(function (o, k) { o.setAttribute("aria-pressed", k === n ? "true" : "false"); });
     PAINEIS[n][2]();
+    acenderGrupos([]);
     pnInfo.innerHTML = "<p class=\"ghost\">Clique num botão do painel.</p>";
   }
   PAINEIS.forEach(function (p, n) {
