@@ -35,7 +35,7 @@
   --pcb-fms: #ffc56b; --pcb-m1: #7ee8b8; --pcb-m2: #ffb3d9; --pcb-fd: #ddd0ff;
   --nota-bg: #eef1f5; --nota-line: #5b6b7d;
   --perigo: #b42318; --perigo-bg: #fef3f2;
-  --painel: #2b2f34; --painel-face: #3a3f45; --painel-borda: #1c1f23; --painel-tecla: #1f2328; --painel-aro: #8b96a3; --painel-texto: #e8edf2; --painel-knob: #5a6068;
+  --painel: #2b2f34; --painel-texto: #e8edf2;  /* paineis sempre escuros; as formas usam as cores do proprio SVG */
   --font-display: "Barlow Semi Condensed", "Arial Narrow", sans-serif;
   --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", Consolas, monospace;
@@ -66,7 +66,7 @@ code { font-family: var(--font-mono); font-size: .92em; }
 /* indice fixo */
 .toc { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: 0 var(--sp-1); align-items: center; min-height: var(--tap);
   background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); margin-inline: -20px; padding-inline: 20px; }
-.toc a { color: var(--fg-2); text-decoration: none; font: 600 var(--fs-md) var(--font-body); padding: var(--sp-2) var(--sp-3); border-radius: var(--radius-sm); min-height: 36px; display: inline-flex; align-items: center; }
+.toc a { color: var(--fg-2); text-decoration: none; font: 600 var(--fs-md) var(--font-body); padding: var(--sp-2) var(--sp-3); border-radius: var(--radius-sm); min-height: var(--tap); display: inline-flex; align-items: center; }
 .toc a:hover { background: var(--surface-2); color: var(--fg); }
 .toc a:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
 .secao, header { scroll-margin-top: 56px; }
@@ -78,7 +78,6 @@ header p { margin: var(--sp-2) 0 0; color: var(--fg-2); max-width: var(--measure
 /* perigo: so o que queima ou deixa o painel mudo */
 .perigo { margin: 0; padding: var(--sp-3) var(--sp-4); border: 1px solid var(--perigo); border-radius: var(--radius-sm); background: var(--perigo-bg); color: var(--fg); max-width: none; }
 .perigo strong { color: var(--perigo); }
-.card .perigo, .card p.perigo { color: var(--fg); }
 
 .regras { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: var(--sp-1) 0; }
 .regras summary, .como > summary { list-style: none; }
@@ -110,7 +109,7 @@ header p { margin: var(--sp-2) 0 0; color: var(--fg-2); max-width: var(--measure
 .board > svg { display: block; width: 100%; min-width: 760px; height: auto; }
 .mega-h { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-xl); margin: 2px 4px var(--sp-3); display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-3); }
 .mega-h small { font: 500 var(--fs-sm) var(--font-body); color: var(--muted); }
-.board > .mega-h { position: sticky; left: 0; }  /* no celular o desenho rola de lado; o titulo fica */
+.board > .mega-h { position: sticky; left: 0; scroll-margin-top: 56px; }  /* no celular o desenho rola de lado; o titulo fica */
 .chip { font: 600 var(--fs-sm) var(--font-body); display: inline-flex; align-items: center; gap: 6px; }
 .legend { display: flex; flex-wrap: wrap; gap: var(--sp-1) var(--sp-5); color: var(--muted); font-size: var(--fs-sm); padding: 2px 4px; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
@@ -144,14 +143,14 @@ thead th { border-bottom: 2px solid var(--line-strong); }
 tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--surface-2) 55%, transparent); }
 td.pinv { font: 600 15px var(--font-mono); color: var(--fg); }
 td.sig { font: 400 var(--fs-md) var(--font-mono); }
+.tables-teste td.sig { white-space: nowrap; }
 .tables { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: var(--sp-4); align-items: start; }
 .tables-teste { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
 /* aviso comum: neutro; o vermelho fica so para .perigo */
 .warn { border-left: 4px solid var(--nota-line); background: var(--nota-bg); padding: var(--sp-3) var(--sp-4); font-size: var(--fs-md); color: var(--fg); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
-.warn.perigo { border: 1px solid var(--perigo); border-left-width: 4px; background: var(--perigo-bg); }
 
 /* como funciona (recolhido) */
-.como { display: grid; gap: var(--sp-4); }
+.como-corpo { display: grid; gap: var(--sp-4); }
 .como > summary { cursor: pointer; display: flex; align-items: baseline; gap: var(--sp-3); min-height: var(--tap); padding: var(--sp-2) 0; border-top: 1px solid var(--line); }
 .como > summary h2 { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-xl); margin: 0; display: inline; }
 .como > summary span { color: var(--muted); font-size: var(--fs-md); }
@@ -195,6 +194,7 @@ td.sig { font: 400 var(--fs-md) var(--font-mono); }
 .comb dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: var(--sp-1) var(--sp-3); font-size: var(--fs-base); }
 .comb dt { color: var(--muted); }
 .comb dd { margin: 0; font-family: var(--font-mono); font-weight: 600; }
+.comb dd.txt { font-family: var(--font-body); }
 .comb pre { font-size: var(--fs-base); }
 .comb a { color: var(--accent); font-weight: 600; text-underline-offset: 3px; }
 .dica { font-size: var(--fs-md); color: var(--muted); margin: 0; }
@@ -257,7 +257,7 @@ td.sig { font: 400 var(--fs-md) var(--font-mono); }
       <span><svg width="12" height="12" aria-hidden="true"><rect x="1" y="1" width="10" height="10" fill="var(--off)"/></svg> linha (L)</span>
       <span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="5" fill="var(--off)"/></svg> coluna (C)</span>
       <span><svg width="12" height="12" aria-hidden="true"><polygon points="6,0.5 11.5,6 6,11.5 0.5,6" fill="var(--off)"/></svg> giro de encoder (fios A e B)</span>
-      <span><svg width="12" height="12" aria-hidden="true"><rect x="1.5" y="1.5" width="9" height="9" fill="var(--header)" stroke="var(--fg)" stroke-width="1.5"/></svg> livre</span>
+      <span><svg width="12" height="12" aria-hidden="true"><rect x="1.5" y="1.5" width="9" height="9" fill="var(--header)" stroke="var(--free)" stroke-width="1.5"/></svg> livre</span>
       <span><svg width="12" height="12" aria-hidden="true"><rect x="1" y="1" width="10" height="10" fill="var(--header)" stroke="var(--off)"/></svg> não usar (serial do USB, energia, SCL/SDA repetidos)</span>
     </div>
 
@@ -290,14 +290,14 @@ td.sig { font: 400 var(--fs-md) var(--font-mono); }
           <tr><td class="pinv">D5 e D44</td><td class="sig">P M1 L4 C8</td></tr>
           <tr><td class="pinv">D36 e D46</td><td class="sig">P M2 L1 C1</td></tr>
           <tr><td class="pinv">A0 e A4</td><td class="sig">P FD L1 C1 EN8</td></tr>
-          <tr><td class="pinv">encoder: A no A10, meio no GND, B no A11</td><td class="sig">G FD EN1 + ou -</td></tr>
+          <tr><td>encoder: A no <code>A10</code>, meio no GND, B no <code>A11</code></td><td class="sig">G FD EN1 + ou -</td></tr>
         </tbody>
       </table></div>
       <div class="tscroll"><table>
         <caption>Mega 2 <small>firmware Mega 2 pronto v1</small></caption>
         <thead><tr><th>Ligue</th><th>Tem que aparecer</th></tr></thead>
         <tbody>
-          <tr><td class="pinv">encoder: A no D22, meio no GND do Mega 2, B no D23</td><td class="sig">G FD EN6 + ou -</td></tr>
+          <tr><td>encoder: A no <code>D22</code>, meio no GND do Mega 2, B no <code>D23</code></td><td class="sig">G FD EN6 + ou -</td></tr>
           <tr><td>jumper</td><td>nada: o Mega 2 não tem matriz</td></tr>
         </tbody>
       </table></div>
@@ -306,6 +306,7 @@ td.sig { font: 400 var(--fs-md) var(--font-mono); }
 
   <details class="secao como" id="como">
     <summary><h2>Como funciona</h2><span>matriz, giro e notas</span></summary>
+    <div class="como-corpo">
 
     <section class="card scheme" aria-labelledby="esquema-titulo">
       <h2 id="esquema-titulo">Como uma tecla é lida</h2>
@@ -371,6 +372,7 @@ td.sig { font: 400 var(--fs-md) var(--font-mono); }
         <p>O encoder não tem posição, só diz um clique para cá ou para lá. Gire até o valor certo aparecer no simulador. Se um clique se perder, dê mais um.</p>
       </div>
     </div>
+    </div>
   </details>
 </div>
 
@@ -413,7 +415,7 @@ td.sig { font: 400 var(--fs-md) var(--font-mono); }
   ];
   var BOARDS = [
     { id: "fms", title: "Teclado FMS", sub: "7 linhas × 12 colunas, 79 teclas", L: ["22","24","26","28","30","32","34"], C: ["23","25","27","29","31","33","35","37","39","41","43","45"],
-      note: "Tudo na barra dupla: linhas na coluna de dentro (pares), colunas na de fora (ímpares). São 19 fios. Cada tecla aperta o botão na mesma posição da janela FMS-1 do simulador (veja \"Como uma tecla é lida\", aba Teclado FMS).", chave: CHAVE_FMS },
+      note: "Tudo na barra dupla: linhas na coluna de dentro (pares), colunas na de fora (ímpares). São 19 fios. Cada tecla aperta o botão na mesma posição da janela FMS-1 do simulador (veja Painéis, aba FMS-1).", chave: CHAVE_FMS },
     { id: "m1", title: "M1", sub: "placa de 32 botões, 4 × 8", L: ["2","3","4","5"], C: ["6","7","8","9","10","11","12","44"],
       note: "Linhas e C1 a C7 na barra de cima. A C8 vai no D44, na barra dupla, lado de dentro, na mesma fileira do D45 (C12 do FMS): confira o furo antes de espetar." },
     { id: "m2", title: "M2", sub: "placa de 32 botões, 4 × 8 (não é o Mega 2)", L: ["36","38","40","42"], C: ["46","47","48","49","50","51","52","53"],
@@ -578,7 +580,7 @@ td.sig { font: 400 var(--fs-md) var(--font-mono); }
       pins.forEach(function (p, i) {
         var x = x0 + i * PITCH, res = pin(p, x, y);
         var dy = below ? 1 : -1;
-        el("text", { x: x, y: y + dy * 24 + (below ? 4 : 0), "text-anchor": "middle", fill: "var(--silk)", "font-family": "IBM Plex Mono, monospace", "font-size": p.length >= 5 ? 9 : p.length >= 3 ? 10 : 11, "font-weight": 500 }, res.g, p);
+        el("text", { x: x, y: y + dy * 24 + (below ? 4 : 0), "text-anchor": "middle", fill: "var(--silk)", "font-family": "IBM Plex Mono, monospace", "font-size": p.length >= 5 ? 7.5 : p.length >= 4 ? 8.5 : p.length >= 3 ? 10 : 11, "font-weight": 500 }, res.g, p);
         if (res.aqui && fora) {
           var cor = "var(--chip-" + grupo(res.r.g) + ")";
           el("text", { x: x, y: y + 32, "text-anchor": "middle", fill: cor, "font-family": "IBM Plex Mono, monospace", "font-size": 9.5, "font-weight": 600 }, res.g, NAME[res.r.g]);
@@ -620,8 +622,8 @@ td.sig { font: 400 var(--fs-md) var(--font-mono); }
       var gx = 236 + 5 * PITCH, gy = 522;
       var gg = el("g", { "class": "pin", "data-g": "fd" });
       el("rect", { x: gx - 10, y: gy - 10, width: 20, height: 20, rx: 3, fill: "none", stroke: COLOR.fd, "stroke-width": 2 }, gg);
-      el("text", { x: gx, y: gy - 38, "text-anchor": "middle", fill: COLOR.fd, "font-family": "IBM Plex Mono, monospace", "font-size": 10, "font-weight": 600 }, gg, "FD");
-      el("text", { x: gx, y: gy - 50, "text-anchor": "middle", fill: COLOR.fd, "font-family": "IBM Plex Mono, monospace", "font-size": 10, "font-weight": 600 }, gg, "GND");
+      el("text", { x: gx, y: gy - 38, "text-anchor": "middle", fill: NO_PCB.fd, "font-family": "IBM Plex Mono, monospace", "font-size": 11, "font-weight": 600 }, gg, "FD");
+      el("text", { x: gx, y: gy - 50, "text-anchor": "middle", fill: NO_PCB.fd, "font-family": "IBM Plex Mono, monospace", "font-size": 11, "font-weight": 600 }, gg, "GND");
       el("title", {}, gg, ONDE.fd === idx
         ? "GND = comum dos encoders do Flight Director (conector H1, pino 1). É o único fio de placa que vai em GND"
         : "GND = comum dos encoders EN6 a EN9 do Flight Director (fio novo soldado no GND da placa). É o único fio que vai em GND neste Mega");
@@ -818,7 +820,7 @@ td.sig { font: 400 var(--fs-md) var(--font-mono); }
 
   if (conflitos.length) {
     var w = document.createElement("div");
-    w.className = "warn";
+    w.className = "perigo";
     w.textContent = "Erro na pinagem desta página: " + conflitos.join(", ") + ". Confira com o firmware.";
     megas[0].parentNode.insertBefore(w, megas[0]);
     console.error("pinagem", conflitos);
@@ -896,7 +898,7 @@ td.sig { font: 400 var(--fs-md) var(--font-mono); }
 
   // Esquema da matriz: linha em LOW, coluna lida com pull-up, tecla no cruzamento.
   var mx = document.getElementById("mx"), steps = document.getElementById("mx-steps");
-  var atual = null, linhasEl = [], colunasEl = [], botoesEl = {}, sel = null;
+  var atual = null, linhasEl = [], colunasEl = [], botoesEl = {}, textosEl = {}, sel = null;
 
   function mxEl(tag, attrs, parent, text) {
     var e = document.createElementNS(NS, tag);
@@ -943,7 +945,7 @@ td.sig { font: 400 var(--fs-md) var(--font-mono); }
           var r = mxEl("rect", { x: x - 13, y: y - 13, width: 26, height: 26, rx: eixo ? 13 : 5, fill: "var(--surface)", stroke: "var(--muted)", "stroke-width": 1.2 }, g);
           var nomeFms = id === "fms" && FMS1[i] ? FMS1[i][j] : null;  // no FMS, o nome do botao da janela FMS-1
           var texto = nomeFms != null ? nomeFms : k != null ? String(k) : "";
-          mxEl("text", { x: x, y: y + 3.5, "text-anchor": "middle", fill: "var(--fg)", "font-family": mono, "font-size": eixo || texto.length > 3 ? 8.5 : 9.5, "font-weight": 600 }, g, texto);
+          textosEl[i + "," + j] = mxEl("text", { x: x, y: y + 3.5, "text-anchor": "middle", fill: "var(--fg)", "font-family": mono, "font-size": eixo || texto.length > 3 ? 8.5 : 9.5, "font-weight": 600 }, g, texto);
           if (nomeFms != null) mxEl("title", {}, g, nomeFms + " = SW" + k + ", L" + (i + 1) + " C" + (j + 1));
           botoesEl[i + "," + j] = r;
           g.addEventListener("click", function () { selecionar(i, j); });
@@ -966,11 +968,13 @@ td.sig { font: 400 var(--fs-md) var(--font-mono); }
       colunasEl[sel[1]].setAttribute("stroke", "var(--line)"); colunasEl[sel[1]].setAttribute("stroke-width", 1.6);
       var antigo = botoesEl[sel[0] + "," + sel[1]];
       if (antigo) antigo.setAttribute("fill", "var(--surface)");
+      if (textosEl[sel[0] + "," + sel[1]]) textosEl[sel[0] + "," + sel[1]].setAttribute("fill", "var(--fg)");
     }
     sel = [i, j];
     linhasEl[i].setAttribute("stroke", cor); linhasEl[i].setAttribute("stroke-width", 3.5);
     colunasEl[j].setAttribute("stroke", cor); colunasEl[j].setAttribute("stroke-width", 3.5);
     if (botoesEl[i + "," + j]) botoesEl[i + "," + j].setAttribute("fill", cor);
+    if (textosEl[i + "," + j]) textosEl[i + "," + j].setAttribute("fill", "#0f1923");  // cor do painel e clara nos dois temas
     acenderPinos(b.id, [b.L[i], b.C[j]]);
 
     var L = "L" + (i + 1), C = "C" + (j + 1), dL = label(b.L[i]), dC = label(b.C[j]);
@@ -1055,7 +1059,7 @@ td.sig { font: 400 var(--fs-md) var(--font-mono); }
       "<dt>Mega</dt><dd>Mega " + (ONDE[b.id] + 1) + "</dd>" +
       "<dt>Linha</dt><dd>L" + (i + 1) + " no " + label(b.L[i]) + "</dd>" +
       "<dt>Coluna</dt><dd>C" + (j + 1) + " no " + label(b.C[j]) + "</dd>" +
-      (aaps ? "<dt>No simulador</dt><dd>" + esc(aaps) + "</dd>" : "") +
+      (aaps ? "<dt>No simulador</dt><dd class=\"txt\">" + esc(aaps) + "</dd>" : "") +
       "</dl><pre>P " + pre + "L" + (i + 1) + " C" + (j + 1) + fim + "</pre>" + linkMega(ONDE[b.id]) + "</div>" };
   }
   function blocoGiro(titulo, en, aaps) {
@@ -1066,7 +1070,7 @@ td.sig { font: 400 var(--fs-md) var(--font-mono); }
       "<dt>Fio A</dt><dd>" + label(par[0]) + "</dd>" +
       "<dt>Fio B</dt><dd>" + label(par[1]) + "</dd>" +
       "<dt>Comum</dt><dd>GND do Mega " + (ONDE[f.board.id] + 1) + "</dd>" +
-      "<dt>No simulador</dt><dd>" + esc(aaps) + "</dd>" +
+      "<dt>No simulador</dt><dd class=\"txt\">" + esc(aaps) + "</dd>" +
       "</dl><pre>G FD " + en + " +</pre>" + linkMega(ONDE[f.board.id]) + "</div>", giro: true };
   }
   function mostrar(titulo, blocos, g) {
