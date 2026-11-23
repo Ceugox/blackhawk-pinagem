@@ -2,7 +2,8 @@
 
 Desenho dos dois Arduino Mega 2560 do simulador, com os pinos de cada painel
 como os firmwares `Mega 1 pronto v8` e `Mega 2 pronto v1` leem: teclado FMS
-(matriz 7x12), duas placas de 32 botões (matrizes 4x8) e o Flight Director
+(matriz 7x12), as placas de 32 botões M1 e M2 (matrizes 4x8, as duas no Mega 1;
+M1/M2 são nomes de placa, não de Mega) e o Flight Director
 (matriz 4x6 e o giro de nove encoders, dois deles duplos).
 
 Página: https://ceugox.github.io/blackhawk-pinagem/

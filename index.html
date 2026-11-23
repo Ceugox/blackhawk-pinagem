@@ -126,7 +126,7 @@ code { font-family: var(--font-mono); font-size: .92em; }
 <div class="wrap">
   <header>
     <h1>Pinagem dos Megas do BlackHawk</h1>
-    <p>Dois Arduino Mega 2560 ligados ao computador, cada um por um cabo USB. O <strong>Mega 1</strong> tem os quatro painéis: teclado FMS, duas placas de 32 botões e o Flight Director. O <strong>Mega 2</strong> tem o giro de EN6 a EN9 do Flight Director, que não coube no Mega 1, e espaço para os próximos componentes. Cada Mega tem o seu firmware: <span class="fw">Mega 1 pronto v8</span> e <span class="fw">Mega 2 pronto v1</span>.</p>
+    <p>Dois Arduino Mega 2560 ligados ao computador, cada um por um cabo USB. O <strong>Mega 1</strong> tem os quatro painéis: teclado FMS, as duas placas de 32 botões <strong>M1</strong> e <strong>M2</strong> (nomes de placa, não de Mega: as duas vão no Mega 1) e o Flight Director. O <strong>Mega 2</strong> tem o giro de EN6 a EN9 do Flight Director, que não coube no Mega 1, e espaço para os próximos componentes. Cada Mega tem o seu firmware: <span class="fw">Mega 1 pronto v8</span> e <span class="fw">Mega 2 pronto v1</span>.</p>
   </header>
 
   <div class="rules">
@@ -139,8 +139,8 @@ code { font-family: var(--font-mono); font-size: .92em; }
   <div class="filters" role="group" aria-label="Destacar um painel">
     <button type="button" data-f="all" aria-pressed="true">Todos</button>
     <button type="button" data-f="fms" aria-pressed="false"><span class="dot" style="background:var(--fms)"></span>Teclado FMS 7×12</button>
-    <button type="button" data-f="m1" aria-pressed="false"><span class="dot" style="background:var(--m1)"></span>Placa 1 (M1) 4×8</button>
-    <button type="button" data-f="m2" aria-pressed="false"><span class="dot" style="background:var(--m2)"></span>Placa 2 (M2) 4×8</button>
+    <button type="button" data-f="m1" aria-pressed="false"><span class="dot" style="background:var(--m1)"></span>M1 4×8</button>
+    <button type="button" data-f="m2" aria-pressed="false"><span class="dot" style="background:var(--m2)"></span>M2 4×8</button>
     <button type="button" data-f="fd" aria-pressed="false"><span class="dot" style="background:var(--fd)"></span>Flight Director (FD) 4×6 e encoders</button>
   </div>
 
@@ -167,8 +167,8 @@ code { font-family: var(--font-mono); font-size: .92em; }
     <p>Cada tecla fica no cruzamento de uma linha com uma coluna. Escolha o painel e clique numa tecla para ver o caminho do sinal e a linha que o Mega manda pela serial. Os dois pinos usados acendem no desenho do Mega 1.</p>
     <div class="tabs" id="tabs-mx" role="group" aria-label="Escolher a matriz">
       <button type="button" data-m="fms" aria-pressed="true">Teclado FMS 7×12</button>
-      <button type="button" data-m="m1" aria-pressed="false">Placa 1 4×8</button>
-      <button type="button" data-m="m2" aria-pressed="false">Placa 2 4×8</button>
+      <button type="button" data-m="m1" aria-pressed="false">M1 4×8</button>
+      <button type="button" data-m="m2" aria-pressed="false">M2 4×8</button>
       <button type="button" data-m="fd" aria-pressed="false">Flight Director 4×6</button>
     </div>
     <div class="scheme-grid">
@@ -263,9 +263,9 @@ code { font-family: var(--font-mono); font-size: .92em; }
   var BOARDS = [
     { id: "fms", title: "Teclado FMS", sub: "7 linhas × 12 colunas, 79 teclas", L: ["22","24","26","28","30","32","34"], C: ["23","25","27","29","31","33","35","37","39","41","43","45"],
       note: "Tudo na barra dupla: linhas na coluna de dentro (pares), colunas na de fora (ímpares). São 19 fios.", chave: CHAVE_FMS },
-    { id: "m1", title: "Placa 1", sub: "M1, 4 × 8, 32 botões", L: ["2","3","4","5"], C: ["6","7","8","9","10","11","12","44"],
+    { id: "m1", title: "M1", sub: "placa de 32 botões, 4 × 8", L: ["2","3","4","5"], C: ["6","7","8","9","10","11","12","44"],
       note: "Linhas e C1 a C7 na barra de cima. A C8 vai no D44, na barra dupla, lado de dentro, na mesma fileira do D45 (C12 do FMS): confira o furo antes de espetar." },
-    { id: "m2", title: "Placa 2", sub: "M2, 4 × 8, 32 botões", L: ["36","38","40","42"], C: ["46","47","48","49","50","51","52","53"],
+    { id: "m2", title: "M2", sub: "placa de 32 botões, 4 × 8 (não é o Mega 2)", L: ["36","38","40","42"], C: ["46","47","48","49","50","51","52","53"],
       note: "Tudo na barra dupla, logo abaixo do FMS. As colunas ocupam as quatro últimas fileiras, dos dois lados." },
     { id: "fd", title: "Flight Director", sub: "FD, 4 × 6, 13 teclas, eixo dos 9 encoders e giro de EN1 a EN5", L: ["A0","A1","A2","A3"], C: ["A4","A5","A6","A7","A8","A9"],
       E: [["A10","A11"],["A12","A13"],["A14","A15"],["14","15"],["16","17"]],
