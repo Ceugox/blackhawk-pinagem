@@ -5,6 +5,9 @@
 // SW0..SW78 uma vez cada, FMS1 (nomes da FMS-1) fora da forma da CHAVE_FMS (o
 // script chama console.error nesses casos). Depois confere a pagina desenhada:
 // nomes da FMS-1 nas teclas, passo a passo, abas de matriz e de encoder.
+// Paineis MFD-1/MFD-2: as 31 posicoes da placa PTT_PFD contra a tabela abaixo,
+// escrita a partir do esquematico SCH_PTT_PFD_SCH_2026-11-16 (a mesma do teste do
+// Painel, painel/testes/Testes.cs, e nao copiada de LAYOUT_MFD).
 // Tambem confere que o detector pega um defeito plantado de proposito.
 const fs = require("fs");
 const html = fs.readFileSync(__dirname + "/../index.html", "utf8");
@@ -118,6 +121,29 @@ function infoDe(painel, rotulo) {
   const b = real.cliques.filter((c) => c.no["@aria-label"] === "Painel: " + rotulo).pop();
   const antes = real.escrito.length; b.fn(); return real.escrito.slice(antes).join("");
 }
+// MFD: as 31 posicoes, botao a botao (troca de dois botoes deixaria o resto verde).
+const MFD_ESPERADO = {
+  TopBezel1: "L2 C1", TopBezel2: "L3 C1", TopBezel3: "L4 C1", TopBezel4: "L1 C8", TopBezel5: "L2 C8", TopBezel6: "L3 C8",
+  LeftBezel1: "L2 C2", LeftBezel2: "L3 C2", LeftBezel3: "L4 C2", LeftBezel4: "L4 C3", LeftBezel5: "L3 C3", LeftBezel6: "L2 C3",
+  RightBezel1: "L2 C7", RightBezel2: "L3 C7", RightBezel3: "L4 C7", RightBezel4: "L1 C6", RightBezel5: "L2 C6", RightBezel6: "L3 C6",
+  BottomBezel1: "L2 C4", BottomBezel2: "L3 C4", BottomBezel3: "L4 C4", BottomBezel4: "L1 C5", BottomBezel5: "L2 C5", BottomBezel6: "L3 C5",
+  Power: "L1 C2", BacklightBrightnessUp: "L1 C3", BacklightBrightnessDown: "L1 C4",
+  VideoBrightnessUp: "L4 C8", VideoBrightnessDown: "L1 C7", VideoContrastUp: "L4 C6", VideoContrastDown: "L4 C5",
+};
+function errosMfd(fonte) {
+  const achados = [], vistos = {};
+  for (const x of fonte.matchAll(/id: "(\w+)", x: [\d.]+, y: [\d.]+, w: [\d.]+, h: [\d.]+, pos: "([^"]+)"/g)) {
+    vistos[x[1]] = true;
+    if (MFD_ESPERADO[x[1]] !== x[2]) achados.push(x[1] + " em " + x[2] + ", esperado " + (MFD_ESPERADO[x[1]] || "nenhum"));
+  }
+  for (const id of Object.keys(MFD_ESPERADO)) if (!vistos[id]) achados.push(id + " fora do painel MFD");
+  return achados;
+}
+const mfdErrado = errosMfd(m[1]);
+if (mfdErrado.length) { console.log("MFD fora do esquematico: " + mfdErrado.join("; ")); process.exit(1); }
+const trocado = m[1].replace('pos: "L2 C2" }', 'pos: "TMP" }').replace('pos: "L3 C2" }', 'pos: "L2 C2" }').replace('pos: "TMP" }', 'pos: "L3 C2" }');
+if (!errosMfd(trocado).some((e) => e.startsWith("LeftBezel1 em L3 C2"))) { console.log("detector do MFD nao pegou dois botoes trocados"); process.exit(1); }
+
 const casos = [
   ["FDDCP-1", "NAV SRC / OBS", ["<pre>G FD EN8 +</pre>", "<dd>D26</dd>", "<pre>G FD EN8M +</pre>", "<dd>D28</dd>", "<pre>P FD L1 C1 EN8</pre>", "Mega 2", "Mega 1"]],
   ["FDDCP-1", "BRG 1 / BRG 2", ["<pre>G FD EN9 +</pre>", "<dd>D30</dd>", "<pre>G FD EN9M +</pre>", "<dd>D32</dd>", "<pre>P FD L3 C1 EN9</pre>"]],
@@ -178,7 +204,7 @@ const plantados = [
   ['{ nome: "DECL", x: 387, y: 207, w: 119, h: 114, chave: 37 },', '', "Painel FDDCP-1 sem a tecla SW37", "tecla do FD fora do painel"],
   ['giro: ["EN3"], alvo', 'giro: [], alvo', "Painel FDDCP-1 sem o giro EN3", "giro do FD fora do painel"],
   ['id: "TopBezel2", x: 273, y: 11, w: 36, h: 28, pos: "L3 C1"', 'id: "TopBezel2", x: 273, y: 11, w: 36, h: 28, pos: "L2 C1"', "Painel MFD: L2 C1 em dois botões", "duas teclas do MFD na mesma posicao"],
-  ['pos: "L4 C5" }', 'pos: "L1 C1" }', "L1 C1 sem função", "canto sem funcao ganhou botao"],
+  ['pos: "L4 C5" }', 'pos: "L1 C1" }', "L1 C1 deveria ficar sem função", "canto sem funcao ganhou botao"],
   ['pos: "L4 C5" }', 'pos: "L5 C5" }', "fora da placa 4 × 8", "MFD em linha que nao existe"],
   ['chave: "EN7", giro: ["EN7"]', 'chave: "EN7", giro: ["EN6"]', "giro de REF SEL não é do encoder EN7", "giro trocado entre giratorios"],
   ['giro: ["EN8", "EN8M"]', 'giro: ["EN8M", "EN8"]', "giro de NAV SRC / OBS não é do encoder EN8", "anel e miolo invertidos"],
