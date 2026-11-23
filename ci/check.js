@@ -79,6 +79,8 @@ const plantados = [
   ['["22","23"]', '["22","1"]', "D1 proibido no Mega 2", "giro do Mega 2 na serial do USB"],
   ['"EN9M-B","GND2"]', '"EN9M-B"]', "GND2 sem conector nem fio novo", "GND do Mega 2 fora da ficha"],
   ['"EN8M-A","EN8M-B",', '', "EN8M-A sem conector nem fio novo", "miolo do duplo fora da ficha"],
+  ['"W", null, "SK8"', '"W", "Z", "SK8"', "FMS L4 C11: nome e SW não batem", "botao do FMS-1 em posicao sem tecla"],
+  ['"G", "H", "I"', '"G", "G", "I"', "FMS-1 G repetido", "botao do FMS-1 repetido"],
   ['["ROW4","COL1"]', '["COL1"]', "ROW4 sem conector nem fio novo", "fio do Flight Director fora dos conectores"],
   ['["GND","ROW3"', '["ROW3"', "GND sem conector nem fio novo", "GND dos encoders fora dos conectores"],
 ];
