@@ -561,14 +561,32 @@ code { font-family: var(--font-mono); font-size: .92em; }
   giros.forEach(function (gi) { precisa.push(gi.b.EN[gi.k] + "-A", gi.b.EN[gi.k] + "-B"); });
   precisa.forEach(function (s) { if (!ligados[s]) conflitos.push(s + " sem conector nem fio novo"); });
 
-  var nomesFms = {};
-  FMS1.forEach(function (linha, i) {
-    linha.forEach(function (n, j) {
-      if ((n == null) !== (CHAVE_FMS[i][j] === -1)) conflitos.push("FMS L" + (i + 1) + " C" + (j + 1) + ": nome e SW não batem");
+  // FMS1 tem de ter a forma da CHAVE_FMS (7 x 12), um nome em cada posicao com
+  // tecla e nenhum nas vazias, sem repetir. A volta e pela CHAVE_FMS, a fonte.
+  var nomesFms = {}, swVistos = {};
+  // A propria CHAVE_FMS: uma fileira por pino de linha e uma coluna por pino de
+  // coluna do FMS em BOARDS (7 x 12), so numeros, as 79 teclas SW0..SW78 uma vez cada.
+  var nLf = BY.fms.L.length, nCf = BY.fms.C.length;
+  if (CHAVE_FMS.length !== nLf) conflitos.push("CHAVE_FMS com " + CHAVE_FMS.length + " fileiras, esperado " + nLf);
+  CHAVE_FMS.forEach(function (l, i) {
+    if (l.length !== nCf) conflitos.push("CHAVE_FMS fileira " + (i + 1) + " com " + l.length + " colunas, esperado " + nCf);
+    l.forEach(function (sw) {
+      if (typeof sw !== "number") { conflitos.push("CHAVE_FMS fileira " + (i + 1) + " com valor que não é número: " + sw); return; }
+      if (sw !== -1) { if (swVistos[sw]) conflitos.push("SW" + sw + " repetida no FMS"); swVistos[sw] = true; }
+    });
+  });
+  for (var s = 0; s <= 78; s++) if (!swVistos[s]) conflitos.push("SW" + s + " sem posição no FMS");
+  if (Object.keys(swVistos).length !== 79) conflitos.push("FMS com " + Object.keys(swVistos).length + " teclas, esperado 79");
+  if (FMS1.length !== CHAVE_FMS.length) conflitos.push("FMS1 com " + FMS1.length + " fileiras, esperado " + CHAVE_FMS.length);
+  CHAVE_FMS.forEach(function (linhaSw, i) {
+    var linha = FMS1[i] || [];
+    if (linha.length !== linhaSw.length) conflitos.push("FMS1 fileira " + (i + 1) + " com " + linha.length + " nomes, esperado " + linhaSw.length);
+    linhaSw.forEach(function (sw, j) {
+      var n = linha[j];
+      if ((n == null) !== (sw === -1)) conflitos.push("FMS L" + (i + 1) + " C" + (j + 1) + ": nome e SW não batem");
       if (n != null) { if (nomesFms[n]) conflitos.push("FMS-1 " + n + " repetido"); nomesFms[n] = true; }
     });
   });
-  if (Object.keys(nomesFms).length !== 79) conflitos.push("FMS-1 com " + Object.keys(nomesFms).length + " botões, esperado 79");
 
   if (conflitos.length) {
     var w = document.createElement("div");
@@ -683,7 +701,7 @@ code { font-family: var(--font-mono); font-size: .92em; }
           var eixo = typeof k === "string";
           var g = mxEl("g", { "class": "mx-btn", tabindex: 0, role: "button", "aria-label": (eixo ? "Eixo do encoder " + k : "Tecla") + " L" + (i + 1) + " C" + (j + 1) });
           var r = mxEl("rect", { x: x - 13, y: y - 13, width: 26, height: 26, rx: eixo ? 13 : 5, fill: "var(--surface)", stroke: "var(--muted)", "stroke-width": 1.2 }, g);
-          var nomeFms = id === "fms" ? FMS1[i][j] : null;  // no FMS, o nome do botao da janela FMS-1
+          var nomeFms = id === "fms" && FMS1[i] ? FMS1[i][j] : null;  // no FMS, o nome do botao da janela FMS-1
           var texto = nomeFms != null ? nomeFms : k != null ? String(k) : "";
           mxEl("text", { x: x, y: y + 3.5, "text-anchor": "middle", fill: "var(--fg)", "font-family": mono, "font-size": eixo || texto.length > 3 ? 8.5 : 9.5, "font-weight": 600 }, g, texto);
           if (nomeFms != null) mxEl("title", {}, g, nomeFms + " = SW" + k + ", L" + (i + 1) + " C" + (j + 1));
@@ -730,7 +748,7 @@ code { font-family: var(--font-mono); font-size: .92em; }
       "<li>LOW em " + C + " durante a vez de " + L + " indica esta posição, se só ela estiver apertada. Depois de 3 leituras iguais, cerca de 15 ms, o Mega envia:</li>" +
       "</ol>" +
       "<pre>P " + pre + L + " " + C + fim + "</pre>" +
-      (b.id === "fms" && FMS1[i][j] != null ? "<p>O Painel clica <strong>" + FMS1[i][j] + "</strong> na janela FMS-1 do simulador.</p>" : "") +
+      (b.id === "fms" && FMS1[i] && FMS1[i][j] != null ? "<p>O Painel clica <strong>" + FMS1[i][j] + "</strong> na janela FMS-1 do simulador.</p>" : "") +
       "<p>Ao soltar, vem a mesma linha com <code>R</code> no lugar do <code>P</code>. A varredura passa pelas " + b.L.length + " linhas a cada 5 ms. Toque com menos de cerca de 15 ms é descartado como ruído do contato.</p>" +
       "<p class=\"ghost\">A placa não tem diodos: apertar três teclas que formem três cantos de um retângulo faz o quarto canto parecer apertado. Aperte uma de cada vez.</p>";
   }
