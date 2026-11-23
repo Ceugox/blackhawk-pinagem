@@ -11,22 +11,28 @@ if (!m) { console.log("script da pinagem nao encontrado"); process.exit(1); }
 // Roda o script; guarda o HTML que ele escreve (fichas, passos) e os botoes que
 // ele cria com clique (abas dos encoders), para o teste da pagina renderizada.
 function rodar(src) {
-  const escrito = [], cliques = [];
+  const escrito = [], cliques = [], nos = [], abasMx = [];
   function node() {
-    return { setAttribute() {}, appendChild() {}, insertBefore() {},
+    const n = { setAttribute() {}, appendChild() {}, insertBefore() {}, removeChild() {}, firstChild: null,
       addEventListener(tipo, fn) { if (tipo === "click") cliques.push({ no: this, fn }); },
       parentNode: null, style: {}, textContent: "", set innerHTML(v) { escrito.push(v); } };
+    nos.push(n);
+    return n;
   }
   const svg = node(); svg.parentNode = node();
+  // As quatro abas da matriz ("Como uma tecla e lida"), como no HTML.
+  for (const m of ["fms", "m1", "m2", "fd"]) {
+    const b = node(); b.getAttribute = (a) => (a === "data-m" ? m : null); abasMx.push(b);
+  }
   global.document = {
     getElementById: () => svg, createElementNS: () => node(),
-    createElement: () => node(), querySelectorAll: () => [],
+    createElement: () => node(), querySelectorAll: (s) => (s === "#tabs-mx button" ? abasMx : []),
   };
   const achados = [];
   const original = console.error;
   console.error = (...a) => achados.push(a.join(" "));
   try { new Function(src)(); } finally { console.error = original; }
-  return { achados, escrito, cliques };
+  return { achados, escrito, cliques, nos, abasMx };
 }
 function erros(src) { return rodar(src).achados; }
 
@@ -43,6 +49,23 @@ for (const [en, pino] of [["EN6-A", "D22"], ["EN8M-B", "D29"], ["EN9M-A", "D32"]
   }
 }
 if (!/A3<\/td>/.test(ficha) || / do Mega 1</.test(ficha)) { console.log("ficha do Mega 1 com sufixo errado"); process.exit(1); }
+// Matriz do FMS desenhada ao abrir: as teclas mostram o botao da FMS-1, e o
+// passo a passo da tecla selecionada (L3 C7, SW42) diz que o Painel clica N.
+const textos = () => real.nos.map((n) => n.textContent);
+for (const nome of ["D➛", "BRT", "A", "+/-", "SPC", "ENT", "IDNT"]) {
+  if (!textos().includes(nome)) { console.log("matriz do FMS sem a tecla " + nome); process.exit(1); }
+}
+if (!real.escrito.some((h) => h.includes("O Painel clica <strong>N</strong>") && h.includes("P L3 C7 SW42"))) {
+  console.log("passo a passo do FMS nao diz que SW42 clica N"); process.exit(1);
+}
+// As outras abas nao herdam os nomes do FMS.
+for (const aba of real.abasMx.slice(1)) {
+  const antes = real.nos.length, idx = real.cliques.findIndex((c) => c.no === aba);
+  real.cliques[idx].fn();
+  const novos = real.nos.slice(antes).map((n) => n.textContent);
+  if (novos.includes("BRT") || novos.includes("IDNT")) { console.log("aba " + aba.getAttribute("data-m") + " com nome do FMS-1"); process.exit(1); }
+  if (aba.getAttribute("data-m") === "fd" && !novos.includes("EN8")) { console.log("aba fd sem os eixos de encoder"); process.exit(1); }
+}
 const abas = real.cliques.filter((c) => / · /.test(c.no.textContent));
 const esperadas = ["EN1", "EN2", "EN3", "EN4", "EN5", "EN6", "EN7", "EN8", "EN8M", "EN9", "EN9M"];
 if (abas.map((c) => c.no.textContent.split(" · ")[0]).join() !== esperadas.join()) {
@@ -81,6 +104,7 @@ const plantados = [
   ['"EN8M-A","EN8M-B",', '', "EN8M-A sem conector nem fio novo", "miolo do duplo fora da ficha"],
   ['"W", null, "SK8"', '"W", "Z", "SK8"', "FMS L4 C11: nome e SW não batem", "botao do FMS-1 em posicao sem tecla"],
   ['"G", "H", "I"', '"G", "G", "I"', "FMS-1 G repetido", "botao do FMS-1 repetido"],
+  ['"W", null, "SK8"]', '"W", null]', "FMS1 fileira 4 com 11 nomes", "fileira do FMS-1 curta"],
   ['["ROW4","COL1"]', '["COL1"]', "ROW4 sem conector nem fio novo", "fio do Flight Director fora dos conectores"],
   ['["GND","ROW3"', '["ROW3"', "GND sem conector nem fio novo", "GND dos encoders fora dos conectores"],
 ];

@@ -561,14 +561,19 @@ code { font-family: var(--font-mono); font-size: .92em; }
   giros.forEach(function (gi) { precisa.push(gi.b.EN[gi.k] + "-A", gi.b.EN[gi.k] + "-B"); });
   precisa.forEach(function (s) { if (!ligados[s]) conflitos.push(s + " sem conector nem fio novo"); });
 
+  // FMS1 tem de ter a forma da CHAVE_FMS (7 x 12), um nome em cada posicao com
+  // tecla e nenhum nas vazias, sem repetir. A volta e pela CHAVE_FMS, a fonte.
   var nomesFms = {};
-  FMS1.forEach(function (linha, i) {
-    linha.forEach(function (n, j) {
-      if ((n == null) !== (CHAVE_FMS[i][j] === -1)) conflitos.push("FMS L" + (i + 1) + " C" + (j + 1) + ": nome e SW não batem");
+  if (FMS1.length !== CHAVE_FMS.length) conflitos.push("FMS1 com " + FMS1.length + " fileiras, esperado " + CHAVE_FMS.length);
+  CHAVE_FMS.forEach(function (linhaSw, i) {
+    var linha = FMS1[i] || [];
+    if (linha.length !== linhaSw.length) conflitos.push("FMS1 fileira " + (i + 1) + " com " + linha.length + " nomes, esperado " + linhaSw.length);
+    linhaSw.forEach(function (sw, j) {
+      var n = linha[j];
+      if ((n == null) !== (sw === -1)) conflitos.push("FMS L" + (i + 1) + " C" + (j + 1) + ": nome e SW não batem");
       if (n != null) { if (nomesFms[n]) conflitos.push("FMS-1 " + n + " repetido"); nomesFms[n] = true; }
     });
   });
-  if (Object.keys(nomesFms).length !== 79) conflitos.push("FMS-1 com " + Object.keys(nomesFms).length + " botões, esperado 79");
 
   if (conflitos.length) {
     var w = document.createElement("div");
