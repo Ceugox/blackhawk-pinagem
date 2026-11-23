@@ -23,24 +23,31 @@ function rodar(src) {
     return n;
   }
   const svg = node(); svg.parentNode = node();
+  const porId = {};  // um no por id: mega-0 e mega-1 separados, cada um dentro da sua placa
+  function porIdDe(id) {
+    if (!porId[id]) { const n = node(); n.parentNode = node(); n.parentNode.parentNode = node(); n.id = id; porId[id] = n; }
+    return porId[id];
+  }
+  const filtros = ["all", "fms", "m1", "m2", "fd"].map((f) => { const b = node(); b.getAttribute = (a) => (a === "data-f" ? f : b["@" + a]); return b; });
   // As quatro abas da matriz ("Como uma tecla e lida"), como no HTML.
   for (const m of ["fms", "m1", "m2", "fd"]) {
     const b = node(); b.getAttribute = (a) => (a === "data-m" ? m : null); abasMx.push(b);
   }
   global.document = {
-    getElementById: () => svg, createElementNS: () => node(),
-    createElement: () => node(), querySelectorAll: (s) => (s === "#tabs-mx button" ? abasMx : []),
+    getElementById: (id) => (/^mega-[01]$/.test(id) ? porIdDe(id) : svg), createElementNS: () => node(),
+    createElement: () => node(), querySelectorAll: (s) => (s === "#tabs-mx button" ? abasMx : s === ".filters button" ? filtros : []),
   };
   const achados = [];
   const original = console.error;
   console.error = (...a) => achados.push(a.join(" "));
   try { new Function(src)(); } finally { console.error = original; }
-  return { achados, escrito, cliques, nos, abasMx };
+  return { achados, escrito, cliques, nos, abasMx, filtros, mega: (i) => porIdDe("mega-" + i) };
 }
 function erros(src) { return rodar(src).achados; }
 
 const real = rodar(m[1]);
 if (real.achados.length) { console.log("pinagem com erro: " + real.achados.join("; ")); process.exit(1); }
+for (const i of [0, 1]) if (String(real.mega(i)["@class"] || "").includes("has-hit")) { console.log("Mega " + (i + 1) + " com pino aceso ao abrir a pagina"); process.exit(1); }
 
 // A pagina renderizada: a ficha tem de mandar o giro de EN6-EN9 para o Mega 2,
 // e cada aba de encoder (Mega 1 e Mega 2) tem de abrir sem erro e mostrar a
@@ -85,6 +92,26 @@ for (const aba of abasPn) {
     if (!/<pre>[PG] /.test(info) || !info.includes("<dd>Mega ")) { console.log("painel " + nome + ", " + b.no["@aria-label"] + " sem combinação"); process.exit(1); }
   }
 }
+// Destaque do clique: ao abrir nada aceso; clicar acende so no Mega certo (has-hit);
+// o filtro "Todos" limpa; o bloco traz o link para o Mega e, no giro, a dica.
+const classe = (i) => String(real.mega(i)["@class"] || "");
+function clicarPainel(painel, rotulo) {
+  real.cliques.find((c) => c.no.textContent === painel && c.no.type === "button").fn();
+  const b = real.cliques.filter((c) => c.no["@aria-label"] === "Painel: " + rotulo).pop();
+  const antes = real.escrito.length; b.fn(); return real.escrito.slice(antes).join("");
+}
+const fmsEnt = clicarPainel("FMS-1", "ENT");
+if (!classe(0).includes("has-hit") || classe(1).includes("has-hit")) { console.log("ENT do FMS deveria destacar so o Mega 1: [" + classe(0) + "] [" + classe(1) + "]"); process.exit(1); }
+if (!fmsEnt.includes("Ver os pinos no desenho do Mega 1") || fmsEnt.includes("class=\"dica\"")) { console.log("ENT: link do Mega 1 ou dica de giro errados"); process.exit(1); }
+const navsrc = clicarPainel("FDDCP-1", "NAV SRC / OBS");
+if (!classe(0).includes("has-hit") || !classe(1).includes("has-hit")) { console.log("NAV SRC deveria destacar os dois Megas"); process.exit(1); }
+if (!navsrc.includes("Ver os pinos no desenho do Mega 2") || !navsrc.includes("class=\"dica\"") || (navsrc.match(/class="dica"/g) || []).length !== 1) { console.log("NAV SRC: link do Mega 2 ou dica unica faltando"); process.exit(1); }
+real.cliques.filter((c) => c.no === real.filtros[1]).pop().fn();  // filtro FMS
+if (classe(0) !== "focus-fms" || classe(1) !== "focus-fms") { console.log("filtro FMS deveria limpar o destaque: [" + classe(0) + "]"); process.exit(1); }
+clicarPainel("FDDCP-1", "HDG P-SYNC");
+real.cliques.filter((c) => c.no === real.filtros[0]).pop().fn();  // Todos
+if (classe(0) !== "" || classe(1) !== "") { console.log("Todos deveria limpar filtro e destaque"); process.exit(1); }
+
 // Combinacoes conferidas a mao (fontes: firmware, ficha do FD, decisao de 23/11)
 function infoDe(painel, rotulo) {
   abasPn.find((c) => c.no.textContent === painel).fn();
