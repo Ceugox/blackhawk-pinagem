@@ -37,11 +37,12 @@ Falha se um pino estiver em dois painéis do mesmo Mega, se uma matriz ou um enc
 pino proibido (serial, D13, energia, SCL/SDA), se um pino for desenhado sem
 papel ou listado em `BOARDS` sem aparecer no desenho, se a ficha não mandar o
 giro de EN6 a EN9 ao Mega 2 ou se alguma aba de encoder quebrar. Falha também
-se a `CHAVE_FMS` não tiver 7 × 12 com as 79 teclas SW0 a SW78 uma vez cada,
+se a `CHAVE_FMS` não tiver uma fileira por pino de linha e uma coluna por pino
+de coluna do FMS (7 × 12), só números, com as 79 teclas SW0 a SW78 uma vez cada,
 se `FMS1` não tiver a forma da `CHAVE_FMS` ("FMS1 fileira N com X nomes", "FMS
 Ln Cn: nome e SW não batem", "FMS-1 X repetido"), se a matriz do FMS não mostrar
 os nomes da FMS-1, se o passo a passo não disser que a SW42 clica N, ou se o
-nome do FMS-1 aparecer em M1, M2 ou Flight Director. Também planta 26
+nome do FMS-1 aparecer em M1, M2 ou Flight Director. Também planta 28
 defeitos e exige que cada um gere o erro certo. Também falha se um sinal
 de conector do Flight Director não cair num pino do Mega, se um fio do
 Flight Director não sair em nenhum conector ou fio novo, ou se um painel sair

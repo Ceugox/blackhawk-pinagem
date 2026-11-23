@@ -564,11 +564,16 @@ code { font-family: var(--font-mono); font-size: .92em; }
   // FMS1 tem de ter a forma da CHAVE_FMS (7 x 12), um nome em cada posicao com
   // tecla e nenhum nas vazias, sem repetir. A volta e pela CHAVE_FMS, a fonte.
   var nomesFms = {}, swVistos = {};
-  // A propria CHAVE_FMS: 7 x 12, as 79 teclas SW0..SW78 uma vez cada.
-  if (CHAVE_FMS.length !== 7) conflitos.push("CHAVE_FMS com " + CHAVE_FMS.length + " fileiras, esperado 7");
+  // A propria CHAVE_FMS: uma fileira por pino de linha e uma coluna por pino de
+  // coluna do FMS em BOARDS (7 x 12), so numeros, as 79 teclas SW0..SW78 uma vez cada.
+  var nLf = BY.fms.L.length, nCf = BY.fms.C.length;
+  if (CHAVE_FMS.length !== nLf) conflitos.push("CHAVE_FMS com " + CHAVE_FMS.length + " fileiras, esperado " + nLf);
   CHAVE_FMS.forEach(function (l, i) {
-    if (l.length !== 12) conflitos.push("CHAVE_FMS fileira " + (i + 1) + " com " + l.length + " colunas, esperado 12");
-    l.forEach(function (sw) { if (sw !== -1) { if (swVistos[sw]) conflitos.push("SW" + sw + " repetida no FMS"); swVistos[sw] = true; } });
+    if (l.length !== nCf) conflitos.push("CHAVE_FMS fileira " + (i + 1) + " com " + l.length + " colunas, esperado " + nCf);
+    l.forEach(function (sw) {
+      if (typeof sw !== "number") { conflitos.push("CHAVE_FMS fileira " + (i + 1) + " com valor que não é número: " + sw); return; }
+      if (sw !== -1) { if (swVistos[sw]) conflitos.push("SW" + sw + " repetida no FMS"); swVistos[sw] = true; }
+    });
   });
   for (var s = 0; s <= 78; s++) if (!swVistos[s]) conflitos.push("SW" + s + " sem posição no FMS");
   if (Object.keys(swVistos).length !== 79) conflitos.push("FMS com " + Object.keys(swVistos).length + " teclas, esperado 79");
@@ -743,7 +748,7 @@ code { font-family: var(--font-mono); font-size: .92em; }
       "<li>LOW em " + C + " durante a vez de " + L + " indica esta posição, se só ela estiver apertada. Depois de 3 leituras iguais, cerca de 15 ms, o Mega envia:</li>" +
       "</ol>" +
       "<pre>P " + pre + L + " " + C + fim + "</pre>" +
-      (b.id === "fms" && FMS1[i][j] != null ? "<p>O Painel clica <strong>" + FMS1[i][j] + "</strong> na janela FMS-1 do simulador.</p>" : "") +
+      (b.id === "fms" && FMS1[i] && FMS1[i][j] != null ? "<p>O Painel clica <strong>" + FMS1[i][j] + "</strong> na janela FMS-1 do simulador.</p>" : "") +
       "<p>Ao soltar, vem a mesma linha com <code>R</code> no lugar do <code>P</code>. A varredura passa pelas " + b.L.length + " linhas a cada 5 ms. Toque com menos de cerca de 15 ms é descartado como ruído do contato.</p>" +
       "<p class=\"ghost\">A placa não tem diodos: apertar três teclas que formem três cantos de um retângulo faz o quarto canto parecer apertado. Aperte uma de cada vez.</p>";
   }

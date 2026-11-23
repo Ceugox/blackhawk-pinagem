@@ -110,6 +110,8 @@ const plantados = [
   ['"W", null, "SK8"]', '"W", null]', "FMS1 fileira 4 com 11 nomes", "fileira do FMS-1 curta"],
   ['65, 71, 77]', '65, 71, -1]', "SW77 sem posição no FMS", "tecla do FMS some da CHAVE_FMS"],
   ['[ 1, 10, 17', '[ 0, 10, 17', "SW0 repetida no FMS", "SW repetida na CHAVE_FMS"],
+  ['65, 71, 77]', '65, 71, 77, -1]', "CHAVE_FMS fileira 1 com 13 colunas", "CHAVE_FMS com coluna a mais"],
+  ['[ 5,  7, 13', '[ "5",  7, 13', "valor que não é número", "SW entre aspas na CHAVE_FMS"],
   ['["ROW4","COL1"]', '["COL1"]', "ROW4 sem conector nem fio novo", "fio do Flight Director fora dos conectores"],
   ['["GND","ROW3"', '["ROW3"', "GND sem conector nem fio novo", "GND dos encoders fora dos conectores"],
 ];
