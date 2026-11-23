@@ -70,6 +70,7 @@ code { font-family: var(--font-mono); font-size: .92em; }
 .toc a:hover { background: var(--surface-2); color: var(--fg); }
 .toc a:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
 .secao, header { scroll-margin-top: 56px; }
+@media (max-width: 560px) { .secao, header, .board > .mega-h { scroll-margin-top: 100px; } }
 
 header h1 { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-2xl); line-height: 1.1; margin: var(--sp-4) 0 0; text-wrap: balance; }
 header p { margin: var(--sp-2) 0 0; color: var(--fg-2); max-width: var(--measure); }
@@ -152,7 +153,7 @@ td.sig { font: 400 var(--fs-md) var(--font-mono); }
 /* como funciona (recolhido) */
 .como-corpo { display: grid; gap: var(--sp-4); }
 .como > summary { cursor: pointer; display: flex; align-items: baseline; gap: var(--sp-3); min-height: var(--tap); padding: var(--sp-2) 0; border-top: 1px solid var(--line); }
-.como > summary h2 { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-xl); margin: 0; display: inline; }
+.como > summary .como-titulo { font-family: var(--font-display); font-weight: 600; font-size: var(--fs-xl); line-height: var(--lh-tight); color: var(--fg); }
 .como > summary span { color: var(--muted); font-size: var(--fs-md); }
 .como[open] > summary { margin-bottom: var(--sp-4); }
 .notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--sp-4); }
@@ -305,7 +306,7 @@ td.sig { font: 400 var(--fs-md) var(--font-mono); }
   </section>
 
   <details class="secao como" id="como">
-    <summary><h2>Como funciona</h2><span>matriz, giro e notas</span></summary>
+    <summary><span class="como-titulo">Como funciona</span><span>matriz, giro e notas</span></summary>
     <div class="como-corpo">
 
     <section class="card scheme" aria-labelledby="esquema-titulo">
@@ -822,7 +823,8 @@ td.sig { font: 400 var(--fs-md) var(--font-mono); }
     var w = document.createElement("div");
     w.className = "perigo";
     w.textContent = "Erro na pinagem desta página: " + conflitos.join(", ") + ". Confira com o firmware.";
-    megas[0].parentNode.insertBefore(w, megas[0]);
+    var placa = megas[0].parentNode;  // .board: rola de lado no celular, o aviso fica fora dela
+    if (placa.parentNode) placa.parentNode.insertBefore(w, placa); else placa.insertBefore(w, megas[0]);
     console.error("pinagem", conflitos);
   }
 
@@ -855,13 +857,13 @@ td.sig { font: 400 var(--fs-md) var(--font-mono); }
             return "<tr><td>" + (i === 0 ? c[0] : "") + "</td><td>" + onde + "</td><td class=\"sig\">" + (s === "GND2" ? "GND" : s) + "</td><td class=\"pinv\">" + pinoDoSinal(s) + "</td></tr>";
           }).join("");
         }).join("") + "</tbody></table></div>" +
-        "<div class=\"warn\"><strong>O GND do H1 é obrigatório.</strong> Ele é o comum dos encoders EN1 a EN5 no Mega 1 (EN6 a EN9 usam o GND soldado até o Mega 2): sem esse fio as teclas funcionam e o giro fica mudo. Trocar o fio A com o B de um encoder só inverte o sentido.</div>" +
+        "<div class=\"perigo\"><strong>O GND do H1 é obrigatório.</strong> Ele é o comum dos encoders EN1 a EN5 no Mega 1 (EN6 a EN9 usam o GND soldado até o Mega 2): sem esse fio as teclas funcionam e o giro fica mudo. Trocar o fio A com o B de um encoder só inverte o sentido.</div>" +
         "<div class=\"warn\"><strong>Dois fios novos, soldados na placa.</strong> ROW4 e COL1 não saem em nenhum conector do esquemático v1.0. Solde um fio na trilha de ROW4 e leve ao <strong>" + label(fd.L[3]) + "</strong>, e outro na de COL1 até o <strong>" + label(fd.C[0]) + "</strong> (linhas \"Fio novo\" da tabela). Sem eles, 9 das 22 posições ficam mudas: os eixos de EN6 a EN9, SW37 (DECL), SW49 e os eixos de EN2, EN3 e EN5. Teste: apertar a SW37 dá <code>P FD L4 C2 SW37</code> e clica DECL.</div>" +
         "<div class=\"warn\"><strong>Pendências do esquemático v1.0</strong>, a confirmar com quem desenhou a placa: ROW4 e COL1 sem conector (resolvido acima por fio), COL5 em dois conectores, H3 e H4 (basta ligar um), e o giro de EN6 a EN9 sem conector (resolvido por fios soldados até o Mega 2, ficha abaixo).</div>" +
         "<p>O Flight Director comanda a janela FDDCP-1 do simulador. O giro de EN1 a EN5 aciona o \"+\" ou o \"−\" de RALT, ALTP, ALT, IAS e HDG. Cada tecla e cada aperto de eixo aciona o botão na mesma posição da janela, da esquerda para a direita: a coluna do esquemático é a coluna da FDDCP-1.</p>";
     } else if (b.id === "fd2") {
       html += "<p>" + b.note + " O aperto do eixo desses quatro encoders continua na matriz do Mega 1.</p>" +
-        "<div class=\"warn\"><strong>Doze fios e um GND, soldados na placa.</strong> O esquemático v1.0 não leva o giro de EN6 a EN9 a conector nenhum. Solde cada fio direto no pino A ou B do encoder e leve um GND da placa ao GND do Mega 2: ele é o comum desses encoders, sem ele o giro fica mudo.</div>" +
+        "<div class=\"perigo\"><strong>Doze fios e um GND, soldados na placa.</strong> O esquemático v1.0 não leva o giro de EN6 a EN9 a conector nenhum. Solde cada fio direto no pino A ou B do encoder e leve um GND da placa ao GND do Mega 2: ele é o comum desses encoders, sem ele o giro fica mudo.</div>" +
         "<div class=\"warn\"><strong>EN8 e EN9 são duplos.</strong> O anel de fora e o miolo são dois encoders no mesmo eixo, cada um com o seu A e B. Girando o anel do EN8 o Mega 2 manda <code>G FD EN8 +</code>; girando o miolo, <code>G FD EN8M +</code>. Se sair trocado, troque os pares de fio de lugar.</div>" +
         "<p>O giro aciona o \"+\" ou o \"−\" de REF ADJ e REF SEL, e nos duplos o de fora (anel) ou o de dentro (miolo) de NAV SRC / OBS e de BRG 1 / BRG 2 na janela FDDCP-1.</p>";
     } else {
@@ -876,13 +878,13 @@ td.sig { font: 400 var(--fs-md) var(--font-mono); }
   // Destaque de pinos: no Mega do painel.
   var pinosAcesos = [];
   function acenderPinos(boardId, lista) { acenderGrupos([[boardId, lista]]); }
-  // grupos: [[boardId, [pinos]], ...]; cada grupo acende no Mega do seu painel.
   // Classe do svg de cada Mega: o filtro por painel e, se algum pino dele esta
   // aceso, has-hit (o CSS apaga os outros pinos para o aceso aparecer).
   var classeFiltro = "", megaComHit = [false, false];
   function classeMega(idx) {
     megas[idx].setAttribute("class", (classeFiltro + (megaComHit[idx] ? " has-hit" : "")).trim());
   }
+  // grupos: [[boardId, [pinos]], ...]; cada grupo acende no Mega do seu painel.
   function acenderGrupos(grupos) {
     pinosAcesos.forEach(function (e) { e.setAttribute("class", "pin"); });
     pinosAcesos = [];
@@ -1201,7 +1203,8 @@ td.sig { font: 400 var(--fs-md) var(--font-mono); }
     btn.addEventListener("click", function () {
       var f = btn.getAttribute("data-f");
       classeFiltro = f === "all" ? "" : "focus-" + f;
-      classeMega(0); classeMega(1);
+      acenderGrupos([]);  // o filtro substitui o destaque do ultimo clique
+      if (pnSel) { pnSel.setAttribute("class", "pn-btn"); pnSel.setAttribute("aria-pressed", "false"); pnSel = null; }
       buttons.forEach(function (o) { o.setAttribute("aria-pressed", o === btn ? "true" : "false"); });
     });
   });
