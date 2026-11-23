@@ -42,7 +42,7 @@ de coluna do FMS (7 × 12), só números, com as 79 teclas SW0 a SW78 uma vez ca
 se `FMS1` não tiver a forma da `CHAVE_FMS` ("FMS1 fileira N com X nomes", "FMS
 Ln Cn: nome e SW não batem", "FMS-1 X repetido"), se a matriz do FMS não mostrar
 os nomes da FMS-1, se o passo a passo não disser que a SW42 clica N, ou se o
-nome do FMS-1 aparecer em M1, M2 ou Flight Director. Também planta 28
+nome do FMS-1 aparecer em M1, M2 ou Flight Director. Também planta 35
 defeitos e exige que cada um gere o erro certo. Também falha se um sinal
 de conector do Flight Director não cair num pino do Mega, se um fio do
 Flight Director não sair em nenhum conector ou fio novo, ou se um painel sair

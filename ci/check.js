@@ -16,7 +16,7 @@ if (!m) { console.log("script da pinagem nao encontrado"); process.exit(1); }
 function rodar(src) {
   const escrito = [], cliques = [], nos = [], abasMx = [];
   function node() {
-    const n = { setAttribute() {}, appendChild() {}, insertBefore() {}, removeChild() {}, firstChild: null,
+    const n = { setAttribute(k, v) { this["@" + k] = v; }, getAttribute(k) { return this["@" + k]; }, appendChild() {}, insertBefore() {}, removeChild() {}, firstChild: null,
       addEventListener(tipo, fn) { if (tipo === "click") cliques.push({ no: this, fn }); },
       parentNode: null, style: {}, textContent: "", set innerHTML(v) { escrito.push(v); } };
     nos.push(n);
@@ -69,6 +69,42 @@ for (const aba of real.abasMx.slice(1)) {
   if (novos.includes("BRT") || novos.includes("IDNT")) { console.log("aba " + aba.getAttribute("data-m") + " com nome do FMS-1"); process.exit(1); }
   if (aba.getAttribute("data-m") === "fd" && !novos.includes("EN8")) { console.log("aba fd sem os eixos de encoder"); process.exit(1); }
 }
+// Paineis: as 4 abas, e cada botao de cada painel mostra a combinacao certa.
+const abasPn = real.cliques.filter((c) => ["FMS-1", "FDDCP-1", "M1", "M2"].includes(c.no.textContent) && c.no.type === "button");
+const esperadoPn = { "FMS-1": 79, "FDDCP-1": 22, "M1": 32, "M2": 32 };
+if (abasPn.length !== 4) { console.log("abas de painel: " + abasPn.length + ", esperado 4"); process.exit(1); }
+for (const aba of abasPn) {
+  const nome = aba.no.textContent, antesC = real.cliques.length;
+  aba.fn();
+  const botoes = real.cliques.slice(antesC).filter((c) => String(c.no["@aria-label"] || "").startsWith("Painel: "));
+  if (botoes.length !== esperadoPn[nome]) { console.log("painel " + nome + " com " + botoes.length + " botões, esperado " + esperadoPn[nome]); process.exit(1); }
+  for (const b of botoes) {
+    const antes = real.escrito.length;
+    try { b.fn(); } catch (e) { console.log("painel " + nome + ", " + b.no["@aria-label"] + " quebrou: " + e.message); process.exit(1); }
+    const info = real.escrito.slice(antes).join("");
+    if (!/<pre>[PG] /.test(info) || !info.includes("<dd>Mega ")) { console.log("painel " + nome + ", " + b.no["@aria-label"] + " sem combinação"); process.exit(1); }
+  }
+}
+// Combinacoes conferidas a mao (fontes: firmware, ficha do FD, decisao de 23/11)
+function infoDe(painel, rotulo) {
+  abasPn.find((c) => c.no.textContent === painel).fn();
+  const b = real.cliques.filter((c) => c.no["@aria-label"] === "Painel: " + rotulo).pop();
+  const antes = real.escrito.length; b.fn(); return real.escrito.slice(antes).join("");
+}
+const casos = [
+  ["FDDCP-1", "NAV SRC / OBS", ["<pre>G FD EN8 +</pre>", "<dd>D26</dd>", "<pre>G FD EN8M +</pre>", "<dd>D28</dd>", "<pre>P FD L1 C1 EN8</pre>", "Mega 2", "Mega 1"]],
+  ["FDDCP-1", "BRG 1 / BRG 2", ["<pre>G FD EN9 +</pre>", "<dd>D30</dd>", "<pre>G FD EN9M +</pre>", "<dd>D32</dd>", "<pre>P FD L3 C1 EN9</pre>"]],
+  ["FDDCP-1", "HDG", ["<pre>P FD L2 C5 SW43</pre>"]],
+  ["FDDCP-1", "ALT", ["<pre>P FD L2 C4 SW44</pre>"]],
+  ["FDDCP-1", "HDG P-SYNC", ["<pre>G FD EN5 +</pre>", "<dd>D16</dd>", "<dd>D17</dd>", "<pre>P FD L4 C5 EN5</pre>"]],
+  ["FMS-1", "A", ["<pre>P L1 C6 SW39</pre>", "<dd>L1 no D22</dd>", "<dd>C6 no D33</dd>"]],
+  ["FMS-1", "ENT", ["<pre>P L7 C11 SW66</pre>"]],
+  ["M2", "L4 C8", ["<pre>P M2 L4 C8</pre>", "<dd>C8 no D53</dd>"]],
+];
+for (const [painel, rotulo, trechos] of casos) {
+  const info = infoDe(painel, rotulo);
+  for (const tr of trechos) if (!info.includes(tr)) { console.log("painel " + painel + ", " + rotulo + ": falta " + tr); process.exit(1); }
+}
 const abas = real.cliques.filter((c) => / · /.test(c.no.textContent));
 const esperadas = ["EN1", "EN2", "EN3", "EN4", "EN5", "EN6", "EN7", "EN8", "EN8M", "EN9", "EN9M"];
 if (abas.map((c) => c.no.textContent.split(" · ")[0]).join() !== esperadas.join()) {
@@ -108,6 +144,13 @@ const plantados = [
   ['"W", null, "SK8"', '"W", "Z", "SK8"', "FMS L4 C11: nome e SW não batem", "botao do FMS-1 em posicao sem tecla"],
   ['"G", "H", "I"', '"G", "G", "I"', "FMS-1 G repetido", "botao do FMS-1 repetido"],
   ['"W", null, "SK8"]', '"W", null]', "FMS1 fileira 4 com 11 nomes", "fileira do FMS-1 curta"],
+  ['|ENT 1187 1044 42 42")', '")', "Painel FMS-1 sem o botão ENT", "botão do FMS-1 fora do painel"],
+  ['giro: ["EN8", "EN8M"]', 'giro: ["EN8", "EN7M"]', "giro EN7M de NAV SRC / OBS sem fios", "giro do painel sem fio"],
+  ['{ nome: "DECL", x: 387, y: 207, w: 119, h: 114, chave: 37 },', '', "Painel FDDCP-1 sem a tecla SW37", "tecla do FD fora do painel"],
+  ['giro: ["EN3"], alvo', 'giro: [], alvo', "Painel FDDCP-1 sem o giro EN3", "giro do FD fora do painel"],
+  ['chave: "EN7", giro: ["EN7"]', 'chave: "EN7", giro: ["EN6"]', "giro de REF SEL não é do encoder EN7", "giro trocado entre giratorios"],
+  ['giro: ["EN8", "EN8M"]', 'giro: ["EN8M", "EN8"]', "giro de NAV SRC / OBS não é do encoder EN8", "anel e miolo invertidos"],
+  ['chave: 50 }', 'chave: 51 }', "HVR sem posição na matriz do FD", "estação com SW que não existe"],
   ['65, 71, 77]', '65, 71, -1]', "SW77 sem posição no FMS", "tecla do FMS some da CHAVE_FMS"],
   ['[ 1, 10, 17', '[ 0, 10, 17', "SW0 repetida no FMS", "SW repetida na CHAVE_FMS"],
   ['65, 71, 77]', '65, 71, 77, -1]', "CHAVE_FMS fileira 1 com 13 colunas", "CHAVE_FMS com coluna a mais"],
