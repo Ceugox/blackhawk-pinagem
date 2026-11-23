@@ -118,7 +118,19 @@ code { font-family: var(--font-mono); font-size: .92em; }
 .steps pre { margin: 0; font: 600 15px var(--font-mono); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 8px 12px; overflow-x: auto; }
 .steps .ghost { font-size: 13px; color: var(--muted); }
 .wave text { font-family: var(--font-mono); }
-.mx-wrap svg.wave { min-width: 460px; }  /* no celular rola de lado em vez de encolher o texto */
+.mx-wrap svg.wave { min-width: 460px; }
+.pn-wrap { overflow-x: auto; min-width: 0; background: #2b2f34; border-radius: 10px; padding: 10px; }
+.pn-wrap svg { display: block; width: 100%; height: auto; min-width: 560px; }
+.pn-btn { cursor: pointer; }
+.pn-btn:focus { outline: none; }
+.pn-btn:focus-visible .pn-forma { stroke: #ffffff; stroke-width: 3; }
+.pn-btn:hover .pn-forma { stroke: #ffd166; }
+.pn-btn.sel .pn-forma { stroke: #ffd166; stroke-width: 3.5; }
+.comb { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: grid; gap: 6px; background: var(--bg); }
+.comb h3 { margin: 0; color: var(--fg); font-size: 13px; }
+.comb dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: 14px; }
+.comb dt { color: var(--muted); }
+.comb dd { margin: 0; font-family: var(--font-mono); font-weight: 600; }  /* no celular rola de lado em vez de encolher o texto */
 </style>
 </head>
 <body>
@@ -161,6 +173,16 @@ code { font-family: var(--font-mono); font-size: .92em; }
     <span><svg width="12" height="12"><rect x="1.5" y="1.5" width="9" height="9" fill="var(--header)" stroke="var(--fg)" stroke-width="1.5"/></svg> livre</span>
     <span><svg width="12" height="12"><rect x="1" y="1" width="10" height="10" fill="var(--header)" stroke="var(--off)"/></svg> não usar (serial do USB, energia, SCL/SDA repetidos)</span>
   </div>
+
+  <section class="card scheme" aria-labelledby="paineis-titulo">
+    <h2 id="paineis-titulo">Painéis</h2>
+    <p>Cada painel desenhado como no simulador. Clique num botão para ver o que aciona ele: em que Mega, em quais pinos e que linha o Mega manda. Num giratório aparecem o giro e o aperto do eixo; nos duplos (NAV SRC / OBS e BRG 1 / BRG 2), o anel e o miolo separados. Os pinos acendem no desenho do Mega.</p>
+    <div class="tabs" id="tabs-pn" role="group" aria-label="Escolher o painel"></div>
+    <div class="scheme-grid">
+      <div class="pn-wrap"><svg id="pn" viewBox="0 0 600 600" role="img" aria-label="Painel escolhido, com um botão para cada tecla ou giratório"></svg></div>
+      <div class="steps" id="pn-info" aria-live="polite"></div>
+    </div>
+  </section>
 
   <section class="card scheme" aria-labelledby="esquema-titulo">
     <h2 id="esquema-titulo">Como uma tecla é lida</h2>
@@ -588,6 +610,89 @@ code { font-family: var(--font-mono); font-size: .92em; }
     });
   });
 
+  // ---------- Paineis: disposicao como no simulador ----------
+  // FMS-1: centro x, y, largura e altura de cada botao na janela FMS-1 (UI Automation,
+  // 23/11/2026), pelo nome de FMS1. A posicao na matriz sai de FMS1 e a SW da CHAVE_FMS.
+  var LAYOUT_FMS1 = ("D➛ 718 198 42 42|IDNT 1160 198 42 42|SK1 730 306 37 29|SK2 730 374 37 29|SK3 730 444 37 29|SK4 730 514 37 29|SK5 730 584 37 29|" +
+    "SK6 1148 306 37 29|SK7 1148 374 37 29|SK8 1148 444 37 29|SK9 1148 514 37 29|SK10 1148 584 37 29|" +
+    "BRT 692 675 27 30|DIM 692 705 27 30|PRV 692 787 27 30|NXT 692 817 27 30|" +
+    "1 743 681 36 30|2 794 681 36 30|3 843 681 36 30|4 743 737 36 30|5 794 737 36 30|6 843 737 36 30|7 743 790 36 30|8 794 790 36 30|9 843 790 36 30|" +
+    ". 746 844 42 42|0 791 844 36 30|+/- 842 844 42 42|" +
+    "A 909 681 42 42|B 963 681 42 42|C 1018 681 42 42|D 1072 681 42 42|E 1126 681 42 42|F 1180 681 42 42|" +
+    "G 909 736 42 42|H 963 736 42 42|I 1018 736 42 42|J 1072 736 42 42|K 1126 736 42 42|L 1180 736 42 42|" +
+    "M 909 790 42 42|N 963 790 42 42|O 1018 790 42 42|P 1072 790 42 42|Q 1126 790 42 42|R 1180 790 42 42|" +
+    "S 909 844 42 42|T 963 844 42 42|U 1018 844 42 42|V 1072 844 42 42|W 1126 844 42 42|" +
+    "← 728 917 42 42|→ 782 917 42 42|↑ 836 917 42 42|↓ 891 917 42 42|X 987 917 42 42|Y 1042 917 42 42|Z 1096 917 42 42|SPC 1150 917 42 42|" +
+    "COM 698 983 42 42|NAV 752 983 42 42|EGI 806 983 42 42|FPN 860 983 42 42|DAT 915 983 42 42|CLC 969 983 42 42|FIX 1024 983 42 42|F1 1078 983 42 42|F2 1132 983 42 42|MSN 1187 983 42 42|" +
+    "CLR 698 1044 42 42|XPD 752 1044 42 42|INI 806 1044 42 42|ZRO 860 1044 42 42|STS 915 1044 42 42|TST 969 1044 42 42|PPS 1024 1044 42 42|F3 1078 1044 42 42|F4 1132 1044 42 42|ENT 1187 1044 42 42")
+    .split("|").map(function (s) { var v = s.split(" "); return { nome: v[0], cx: +v[1], cy: +v[2], w: +v[3], h: +v[4] }; });
+
+  // FDDCP-1: canto x, y, largura e altura (UI Automation, 23/11/2026). "chave" e o
+  // que esta na matriz do Flight Director (CHAVE_FD): SWn de uma estacao ou ENn do
+  // eixo de um giratorio. "giro": os encoders do giro (sem M = anel, com M = miolo).
+  var LAYOUT_FDDCP = [
+    { nome: "NAV SRC / OBS", x: 68, y: 55, w: 85, h: 85, chave: "EN8", giro: ["EN8", "EN8M"], alvo: "_navSrcKnob" },
+    { nome: "REF SEL", x: 173, y: 55, w: 85, h: 85, chave: "EN7", giro: ["EN7"], alvo: "_refSrcKnob" },
+    { nome: "BRG 1 / BRG 2", x: 68, y: 209, w: 85, h: 85, chave: "EN9", giro: ["EN9", "EN9M"], alvo: "_brgKnob" },
+    { nome: "REF ADJ", x: 173, y: 207, w: 85, h: 85, chave: "EN6", giro: ["EN6"], alvo: "_refAdjKnob" },
+    { nome: "LAT", x: 272, y: 55, w: 119, h: 113, chave: 36 },
+    { nome: "VERT", x: 387, y: 55, w: 119, h: 113, chave: 35 },
+    { nome: "RALT", x: 503, y: 55, w: 119, h: 113, chave: 12 },
+    { nome: "ALTP", x: 612, y: 55, w: 118, h: 113, chave: 11 },
+    { nome: "ALT", x: 727, y: 55, w: 119, h: 113, chave: 44 },
+    { nome: "IAS", x: 843, y: 55, w: 118, h: 113, chave: 45 },
+    { nome: "HDG", x: 958, y: 55, w: 119, h: 113, chave: 43 },
+    { nome: "VS", x: 1074, y: 55, w: 119, h: 113, chave: 48 },
+    { nome: "CPL", x: 1189, y: 55, w: 119, h: 113, chave: 47 },
+    { nome: "GA", x: 272, y: 207, w: 119, h: 114, chave: 38 },
+    { nome: "DECL", x: 387, y: 207, w: 119, h: 114, chave: 37 },
+    { nome: "HVR", x: 1074, y: 207, w: 119, h: 114, chave: 50 },
+    { nome: "(sem nome)", x: 1189, y: 207, w: 119, h: 114, chave: 49 },
+    { nome: "RALT P-SYNC", x: 516, y: 224, w: 85, h: 85, chave: "EN1", giro: ["EN1"], alvo: "_radAltKnob" },
+    { nome: "ALTP P-SYNC", x: 625, y: 224, w: 85, h: 85, chave: "EN2", giro: ["EN2"], alvo: "_altpKnob" },
+    { nome: "ALT P-SYNC", x: 741, y: 224, w: 85, h: 85, chave: "EN3", giro: ["EN3"], alvo: "_baroAlt" },
+    { nome: "IAS P-SYNC", x: 856, y: 224, w: 85, h: 85, chave: "EN4", giro: ["EN4"], alvo: "_airspeedKnob" },
+    { nome: "HDG P-SYNC", x: 973, y: 224, w: 85, h: 85, chave: "EN5", giro: ["EN5"], alvo: "_hdgKnob" }
+  ];
+
+  // Onde esta cada coisa: posicao na matriz pela chave, e fios do giro pelo nome do encoder.
+  function posNaMatriz(tabela, chave) {
+    for (var i = 0; i < tabela.length; i++) for (var j = 0; j < tabela[i].length; j++) if (tabela[i][j] === chave) return [i, j];
+    return null;
+  }
+  function fiosDoGiro(en) {
+    var achado = null;
+    ["fd", "fd2"].forEach(function (id) { var k = BY[id].EN.indexOf(en); if (k >= 0) achado = { board: BY[id], k: k }; });
+    return achado;
+  }
+  function posFms(nome) {
+    for (var i = 0; i < FMS1.length; i++) for (var j = 0; j < FMS1[i].length; j++) if (FMS1[i][j] === nome) return [i, j];
+    return null;
+  }
+
+  // Todo botao desenhado tem combinacao, e toda tecla/encoder aparece em algum painel.
+  (function () {
+    var vistos = {};
+    LAYOUT_FMS1.forEach(function (b) {
+      if (vistos["fms " + b.nome]) conflitos.push("Painel FMS-1: " + b.nome + " desenhado duas vezes");
+      vistos["fms " + b.nome] = true;
+      if (!posFms(b.nome)) conflitos.push("Painel FMS-1: " + b.nome + " sem posição na matriz");
+    });
+    FMS1.forEach(function (l) { l.forEach(function (n) { if (n != null && !vistos["fms " + n]) conflitos.push("Painel FMS-1 sem o botão " + n); }); });
+    var chavesFd = {}, girosFd = {};
+    LAYOUT_FDDCP.forEach(function (b) {
+      if (!posNaMatriz(CHAVE_FD, b.chave)) conflitos.push("Painel FDDCP-1: " + b.nome + " sem posição na matriz do FD");
+      if (chavesFd[b.chave]) conflitos.push("Painel FDDCP-1: " + b.chave + " em dois botões");
+      chavesFd[b.chave] = true;
+      (b.giro || []).forEach(function (en) {
+        if (!fiosDoGiro(en)) conflitos.push("Painel FDDCP-1: giro " + en + " de " + b.nome + " sem fios");
+        girosFd[en] = true;
+      });
+    });
+    CHAVE_FD.forEach(function (l) { l.forEach(function (k) { if (k !== -1 && !chavesFd[k]) conflitos.push("Painel FDDCP-1 sem a tecla " + (typeof k === "number" ? "SW" + k : k)); }); });
+    ["fd", "fd2"].forEach(function (id) { BY[id].EN.forEach(function (en) { if (!girosFd[en]) conflitos.push("Painel FDDCP-1 sem o giro " + en); }); });
+  })();
+
   if (conflitos.length) {
     var w = document.createElement("div");
     w.className = "warn";
@@ -645,12 +750,16 @@ code { font-family: var(--font-mono); font-size: .92em; }
 
   // Destaque de pinos: no Mega do painel.
   var pinosAcesos = [];
-  function acenderPinos(boardId, lista) {
+  function acenderPinos(boardId, lista) { acenderGrupos([[boardId, lista]]); }
+  // grupos: [[boardId, [pinos]], ...]; cada grupo acende no Mega do seu painel.
+  function acenderGrupos(grupos) {
     pinosAcesos.forEach(function (e) { e.setAttribute("class", "pin"); });
     pinosAcesos = [];
-    var mapa = pinEl[ONDE[boardId]];
-    lista.forEach(function (p) {
-      if (mapa[p]) { mapa[p].setAttribute("class", "pin hit"); pinosAcesos.push(mapa[p]); }
+    grupos.forEach(function (gp) {
+      var mapa = pinEl[ONDE[gp[0]]];
+      gp[1].forEach(function (p) {
+        if (mapa[p]) { mapa[p].setAttribute("class", "pin hit"); pinosAcesos.push(mapa[p]); }
+      });
     });
   }
 
@@ -790,6 +899,138 @@ code { font-family: var(--font-mono); font-size: .92em; }
     enTabs.appendChild(btn);
     enBotoes.push(btn);
   });
+
+  // ---------- Paineis: desenho e combinacao de cada botao ----------
+  var pn = document.getElementById("pn"), pnInfo = document.getElementById("pn-info"), pnTabs = document.getElementById("tabs-pn");
+  var pnSel = null;
+  function pnEl(tag, attrs, parent, text) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (text != null) e.textContent = text;
+    (parent || pn).appendChild(e);
+    return e;
+  }
+  function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
+
+  // Uma combinacao: titulo, Mega, pinos e a linha da serial.
+  function blocoTecla(titulo, b, i, j, chave, aaps) {
+    var fim = chave == null ? "" : typeof chave === "number" ? " SW" + chave : " " + chave;
+    var pre = b.id === "fms" ? "" : NAME[b.id] + " ";
+    return { grupo: [b.id, [b.L[i], b.C[j]]], html:
+      "<div class=\"comb\"><h3>" + esc(titulo) + "</h3><dl>" +
+      "<dt>Mega</dt><dd>Mega " + (ONDE[b.id] + 1) + "</dd>" +
+      "<dt>Linha</dt><dd>L" + (i + 1) + " no " + label(b.L[i]) + "</dd>" +
+      "<dt>Coluna</dt><dd>C" + (j + 1) + " no " + label(b.C[j]) + "</dd>" +
+      (aaps ? "<dt>No simulador</dt><dd>" + esc(aaps) + "</dd>" : "") +
+      "</dl><pre>P " + pre + "L" + (i + 1) + " C" + (j + 1) + fim + "</pre></div>" };
+  }
+  function blocoGiro(titulo, en, aaps) {
+    var f = fiosDoGiro(en), par = f.board.E[f.k];
+    return { grupo: [f.board.id, [par[0], par[1]]], html:
+      "<div class=\"comb\"><h3>" + esc(titulo) + "</h3><dl>" +
+      "<dt>Mega</dt><dd>Mega " + (ONDE[f.board.id] + 1) + "</dd>" +
+      "<dt>Fio A</dt><dd>" + label(par[0]) + "</dd>" +
+      "<dt>Fio B</dt><dd>" + label(par[1]) + "</dd>" +
+      "<dt>Comum</dt><dd>GND do Mega " + (ONDE[f.board.id] + 1) + "</dd>" +
+      "<dt>No simulador</dt><dd>" + esc(aaps) + "</dd>" +
+      "</dl><pre>G FD " + en + " +</pre><p class=\"ghost\">Um clique para o outro lado manda <code>-</code>. Trocar A com B inverte o sentido.</p></div>" };
+  }
+  function mostrar(titulo, blocos, g) {
+    if (pnSel) pnSel.setAttribute("class", "pn-btn");
+    pnSel = g; g.setAttribute("class", "pn-btn sel");
+    acenderGrupos(blocos.map(function (b) { return b.grupo; }));
+    pnInfo.innerHTML = "<p class=\"ghost\">" + esc(titulo) + "</p>" + blocos.map(function (b) { return b.html; }).join("");
+  }
+  function botao(forma, attrs, rotulo, tx, ty, fonte, aoClicar, nomeCompleto) {
+    var g = pnEl("g", { "class": "pn-btn", tabindex: 0, role: "button", "aria-label": "Painel: " + (nomeCompleto || rotulo) });
+    attrs["class"] = "pn-forma";
+    pnEl(forma, attrs, g);
+    pnEl("text", { x: tx, y: ty, "text-anchor": "middle", fill: "#e8edf2", "font-family": "IBM Plex Mono, monospace", "font-size": fonte, "font-weight": 600, "pointer-events": "none" }, g, rotulo);
+    g.addEventListener("click", function () { aoClicar(g); });
+    g.addEventListener("keydown", function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); aoClicar(g); } });
+    return g;
+  }
+
+  function desenharFms1() {
+    var x0 = 660, y0 = 170;  // canto da area desenhada na janela FMS-1
+    pn.setAttribute("viewBox", "0 0 600 920");
+    pnEl("rect", { x: 4, y: 4, width: 592, height: 912, rx: 18, fill: "#3a3f45", stroke: "#1c1f23", "stroke-width": 3 });
+    pnEl("rect", { x: 760 - x0, y: 180 - y0 + 50, width: 1120 - 760, height: 610 - 180 - 50, rx: 6, fill: "#0b0f0c", stroke: "#1c1f23" });
+    pnEl("text", { x: (760 + 1120) / 2 - x0, y: 400 - y0, "text-anchor": "middle", fill: "#3f8f4f", "font-family": "IBM Plex Mono, monospace", "font-size": 16 }, null, "tela do FMS");
+    LAYOUT_FMS1.forEach(function (b) {
+      var pos = posFms(b.nome); if (!pos) return;
+      var i = pos[0], j = pos[1], sw = CHAVE_FMS[i][j];
+      var cx = b.cx - x0, cy = b.cy - y0;
+      var fonte = b.nome.length > 3 ? 10 : b.nome.length > 2 ? 11 : 13;
+      botao("rect", { x: cx - b.w / 2, y: cy - b.h / 2, width: b.w, height: b.h, rx: 5, fill: "#1f2328", stroke: "#8b96a3", "stroke-width": 1.4 },
+        b.nome, cx, cy + fonte / 3, fonte, function (g) {
+          mostrar("FMS-1, tecla " + b.nome, [blocoTecla("Apertar", BY.fms, i, j, sw, "botão " + b.nome + " da janela FMS-1")], g);
+        });
+    });
+  }
+
+  function desenharFddcp() {
+    pn.setAttribute("viewBox", "0 0 1359 347");
+    pnEl("rect", { x: 2, y: 2, width: 1355, height: 343, rx: 14, fill: "#3a3f45", stroke: "#1c1f23", "stroke-width": 3 });
+    LAYOUT_FDDCP.forEach(function (b) {
+      var fd = BY.fd, pos = posNaMatriz(CHAVE_FD, b.chave), i = pos[0], j = pos[1];
+      var giratorio = !!b.giro, duplo = giratorio && b.giro.length > 1;
+      var cx = b.x + b.w / 2, cy = b.y + b.h / 2, r = b.w / 2;
+      var g = botao(giratorio ? "circle" : "rect",
+        giratorio ? { cx: cx, cy: cy, r: r - 4, fill: "#5a6068", stroke: "#1c1f23", "stroke-width": 2 }
+                  : { x: b.x + 8, y: b.y + 6, width: b.w - 16, height: b.h - 40, rx: 6, fill: "#0b0f0c", stroke: "#1c1f23", "stroke-width": 2 },
+        b.nome.replace(" P-SYNC", ""), cx, giratorio ? b.y + b.h + 18 : b.y + 48, giratorio ? 15 : 20, function (gg) {
+          var blocos = [];
+          if (duplo) {
+            blocos.push(blocoGiro("Girar o anel (de fora)", b.giro[0], "+/− de fora do " + b.alvo));
+            blocos.push(blocoGiro("Girar o miolo (botão de cima)", b.giro[1], "+/− de dentro do " + b.alvo));
+          } else if (giratorio) {
+            blocos.push(blocoGiro("Girar", b.giro[0], "+/− do " + b.alvo));
+          }
+          blocos.push(blocoTecla(giratorio ? "Apertar o eixo" : "Apertar", fd, i, j, b.chave, giratorio ? "centro do " + b.alvo : "estação " + b.nome));
+          mostrar("FDDCP-1, " + b.nome, blocos, gg);
+        }, b.nome);
+      if (giratorio) {
+        pnEl("circle", { cx: cx, cy: cy, r: duplo ? r * 0.5 : r * 0.28, fill: "#3a3f45", stroke: "#1c1f23", "stroke-width": 2, "pointer-events": "none" }, g);
+        if (duplo) pnEl("circle", { cx: cx, cy: cy, r: r * 0.22, fill: "#5a6068", stroke: "#1c1f23", "stroke-width": 2, "pointer-events": "none" }, g);
+      } else {
+        pnEl("rect", { x: cx - 30, y: b.y + b.h - 26, width: 60, height: 14, rx: 2, fill: "#d9dde2", "pointer-events": "none" }, g);
+      }
+    });
+  }
+
+  function desenharPlaca(id) {
+    var b = BY[id], cel = 70;
+    pn.setAttribute("viewBox", "0 0 " + (b.C.length * cel + 40) + " " + (b.L.length * cel + 40));
+    pnEl("rect", { x: 4, y: 4, width: b.C.length * cel + 32, height: b.L.length * cel + 32, rx: 14, fill: "#3a3f45", stroke: "#1c1f23", "stroke-width": 3 });
+    for (var i = 0; i < b.L.length; i++) for (var j = 0; j < b.C.length; j++) (function (i, j) {
+      var x = 20 + j * cel, y = 20 + i * cel, nome = "L" + (i + 1) + " C" + (j + 1);
+      botao("rect", { x: x + 6, y: y + 6, width: cel - 12, height: cel - 12, rx: 8, fill: "#1f2328", stroke: "#8b96a3", "stroke-width": 1.4 },
+        nome, x + cel / 2, y + cel / 2 + 5, 14, function (g) {
+          mostrar(b.title + ", botão " + nome, [blocoTecla("Apertar", b, i, j, null, null)], g);
+        });
+    })(i, j);
+  }
+
+  var PAINEIS = [["fms1", "FMS-1", desenharFms1], ["fddcp", "FDDCP-1", desenharFddcp], ["m1", "M1", function () { desenharPlaca("m1"); }], ["m2", "M2", function () { desenharPlaca("m2"); }]];
+  var pnBotoes = [];
+  function escolherPainel(n) {
+    while (pn.firstChild) pn.removeChild(pn.firstChild);
+    pnSel = null;
+    pnBotoes.forEach(function (o, k) { o.setAttribute("aria-pressed", k === n ? "true" : "false"); });
+    PAINEIS[n][2]();
+    pnInfo.innerHTML = "<p class=\"ghost\">Clique num botão do painel.</p>";
+  }
+  PAINEIS.forEach(function (p, n) {
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = p[1];
+    btn.setAttribute("aria-pressed", "false");
+    btn.addEventListener("click", function () { escolherPainel(n); });
+    pnTabs.appendChild(btn);
+    pnBotoes.push(btn);
+  });
+  escolherPainel(1);
 
   escolherEncoder(0, false);
   escolher("fms");
