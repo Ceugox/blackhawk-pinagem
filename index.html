@@ -1212,8 +1212,9 @@ td.sig { font: 400 var(--fs-md) var(--font-mono); }
       var m = /^L([1-4]) C([1-8])$/.exec(t.pos); if (!m) return;  // ja acusado nos conflitos
       var i = +m[1] - 1, j = +m[2] - 1;
       var lado = t.x < 100 ? 1 : t.x > 800 ? -1 : 0, cx = t.x + t.w / 2, cy = t.y + t.h / 2;
-      // Rotulo curto ao lado do botao, para dentro (lados), abaixo (cima) ou acima (baixo).
-      var curto = t.nome.replace("esquerda ", "E").replace("direita ", "D").replace("cima ", "C").replace("baixo ", "B")
+      // Rotulo curto ao lado do botao, para dentro (lados), abaixo (cima) ou acima
+      // (baixo). Cima e baixo so com o numero: "C1" se confundiria com a coluna C1.
+      var curto = t.nome.replace("esquerda ", "E").replace("direita ", "D").replace("cima ", "").replace("baixo ", "")
         .replace("Backlight ", "BL").replace("Video Brightness ", "VB").replace("Video Contrast ", "VC").replace("Power", "PWR");
       var tx = lado === 1 ? cx + 46 : lado === -1 ? cx - 46 : cx, ty = lado ? cy + 7 : t.y < 100 ? t.y + 60 : t.y - 14;
       botao("rect", { x: t.x - 4, y: t.y - 4, width: t.w + 8, height: t.h + 8, rx: 5, fill: "#1f2328", stroke: "#8b96a3", "stroke-width": 1.6 },
