@@ -2,8 +2,9 @@
 
 Desenho dos dois Arduino Mega 2560 do simulador, com os pinos de cada painel
 como os firmwares `Mega 1 pronto v8` e `Mega 2 pronto v1` leem: teclado FMS
-(matriz 7x12), as placas de 32 botões M1 e M2 (matrizes 4x8, as duas no Mega 1;
-M1/M2 são nomes de placa, não de Mega) e o Flight Director
+(matriz 7x12), as placas M1 e M2 (placa PTT_PFD, matrizes 4x8, as duas no Mega 1;
+M1/M2 são nomes de placa, não de Mega), que são as molduras do MFD-1 e do MFD-2
+(31 botões cada: a posição L1 C1 fica sem função), e o Flight Director
 (matriz 4x6 e o giro de nove encoders, dois deles duplos).
 
 Página: https://ceugox.github.io/blackhawk-pinagem/
@@ -42,8 +43,11 @@ de coluna do FMS (7 × 12), só números, com as 79 teclas SW0 a SW78 uma vez ca
 se `FMS1` não tiver a forma da `CHAVE_FMS` ("FMS1 fileira N com X nomes", "FMS
 Ln Cn: nome e SW não batem", "FMS-1 X repetido"), se a matriz do FMS não mostrar
 os nomes da FMS-1, se o passo a passo não disser que a SW42 clica N, ou se o
-nome do FMS-1 aparecer em M1, M2 ou Flight Director. Também planta 35
-defeitos e exige que cada um gere o erro certo. Também falha se um sinal
+nome do FMS-1 aparecer em M1, M2 ou Flight Director. Também planta 38
+defeitos e exige que cada um gere o erro certo. Também falha se algum dos 31
+botões do MFD-1/MFD-2 sair da posição do esquemático SCH_PTT_PFD (tabela
+própria no `ci/check.js`, com dois botões trocados de propósito para provar
+que o teste pega). Também falha se um sinal
 de conector do Flight Director não cair num pino do Mega, se um fio do
 Flight Director não sair em nenhum conector ou fio novo, ou se um painel sair
 do Mega decidido para ele.
